@@ -1,5 +1,5 @@
 const router = require('koa-router')()
-
+const  createData = require('../model/index.js')
 router.prefix('/users')
 
 router.post('/login', async function (ctx, next) {
@@ -32,5 +32,39 @@ router.get('/bar', function (ctx, next) {
   ctx.body = 'this is a users/bar response'
 })
 
+//注册--liwen
+/**
+ * 入参：username:string--用户名
+ *      password:string--密码
+ *      nickname:string -- 昵称
+ *      repassword:string --重复确认输入的密码
+ *      gender:'0'|'1' ---- 性别
+ *      email: string ----邮箱
+ *      phone:string ----电话
+ *      info:string ---- 自我介绍
+ */
+
+router.post('/register', async function (ctx, next) {
+  ctx.set('Content-Type','application/json; charset=utf-8');
+
+   const {username,password,nickname,repassword,gender,info,email,phone} = ctx.request.body;
+   console.log(username,password,nickname,repassword,gender,info,email,phone)
+   if(!username||!password||!nickname||!repassword||!gender||!info||!email||!phone){
+   
+    return ctx.body=createData('输入的信息不完整！','01',)
+  }
+  if(password!=repassword){
+   return ctx.body=createData('两次密码输入不一致！','02',)
+  }
+  
+  let sql = `INSERT INTO personal_database.users (userName,userPassWord,premission,nickname,gender,info,email,phone) values ('${username}','${password}',0,'${nickname}','${gender}','${info}','${email}','${phone}');`
+  console.log(sql)
+  await ctx.util.mysql(sql).then((res) => {
+    
+    ctx.body = createData('新增用户成功','200');//返回给前端的数据
+  }).catch((erro)=>{
+    ctx.body = createData('新增用户失败',erro.toString());
+  })
+})
 
 module.exports = router
