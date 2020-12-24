@@ -1,7 +1,8 @@
 const router = require('koa-router')()
-const  createData = require('../model/index.js')
+const { SucessModel, ErrorModel } = require('../model/index.js')
+const { addUser,checkUserName,checkEmail,checkPhone,selectUser } = require('../controller/users')
 router.prefix('/users')
-
+//登录接口
 router.post('/login', async function (ctx, next) {
   // 参数非空判断
   if (ctx && ctx.request && ctx.request.body) {
@@ -17,14 +18,17 @@ router.post('/login', async function (ctx, next) {
     let name = body.userName
     let password = body.userPassWord
     // sql语句
-    let sql = `select * from users where userName = '${name}' and userPassWord=${password}`
-    // sql查询
-    await ctx.util.mysql(sql).then((res) => {
-      ctx.cookies.set('book', 'liujiangtaoceshi')
-      ctx.body = { msg: "登录成功", code: 200 };//返回给前端的数据
-    })
+   const [res] = await selectUser(ctx,{name,password})
+   if(res){
+    ctx.cookies.set('book', 'liujiangtaoceshi')
+    ctx.body = new SucessModel('登陆成功')
+   }else{
+    ctx.body = new ErrorModel('用户名或密码错误！')
+   }
+  
+   
   } else {
-    ctx.body = { msg: "数据异常", code: 500 };//返回给前端的数据
+    ctx.body = new ErrorModel('数据异常')
   }
 })
 
@@ -45,26 +49,37 @@ router.get('/bar', function (ctx, next) {
  */
 
 router.post('/register', async function (ctx, next) {
-  ctx.set('Content-Type','application/json; charset=utf-8');
 
-   const {username,password,nickname,repassword,gender,info,email,phone} = ctx.request.body;
-   console.log(username,password,nickname,repassword,gender,info,email,phone)
-   if(!username||!password||!nickname||!repassword||!gender||!info||!email||!phone){
-   
-    return ctx.body=createData('输入的信息不完整！','01',)
+  const { username, password, nickname, repassword, gender, info, email, phone } = ctx.request.body;
+  console.log(username, password, nickname, repassword, gender, info, email, phone)
+  if (!username || !password || !nickname || !repassword || !gender || !info || !email || !phone) {
+
+    return ctx.body = new ErrorModel('输入的信息不完整！')
   }
-  if(password!=repassword){
-   return ctx.body=createData('两次密码输入不一致！','02',)
+  if (password != repassword) {
+    return ctx.body = new ErrorModel('两次密码输入不一致！')
   }
+
+  const [res1] = await checkUserName(ctx,{username});//用户名是否注册过
+  const [res2] = await checkEmail(ctx,{email});//该邮箱是否注册过
+  const [res3] = await checkPhone(ctx,{phone})//该号码是否注册过
+  if(res1){
+    return ctx.body=new ErrorModel('该用户名已注册！')
+  }
+
+  if(res2){
+    return ctx.body = new ErrorModel('该邮箱已被注册！')
+  }
+  if(res3){
+    return ctx.body = new ErrorModel('该手机号已被注册！')
+  }
+
+
+  const userId = new Date().getTime().toFixed(0)
+  const data = await addUser(ctx,{userId,username,password,nickname,gender,info,email,phone})
   
-  let sql = `INSERT INTO personal_database.users (userName,userPassWord,premission,nickname,gender,info,email,phone) values ('${username}','${password}',0,'${nickname}','${gender}','${info}','${email}','${phone}');`
-  console.log(sql)
-  await ctx.util.mysql(sql).then((res) => {
-    
-    ctx.body = createData('新增用户成功','200');//返回给前端的数据
-  }).catch((erro)=>{
-    ctx.body = createData('新增用户失败',erro.toString());
-  })
+  ctx.body=new SucessModel('注册成功！')
+ 
 })
 
 module.exports = router
