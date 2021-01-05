@@ -5,8 +5,8 @@ let query = (sql, host = '127.0.0.1') => {
     if (!pools.hasOwnProperty(host)) {//是否存在连接池
         pools[host] = mysql.createPool({//不存在创建
             host: "localhost",
-            user: "webxiaodudu",
-            password: "pltkd@198526",
+            user: "root",
+            password: "123456",
             database: "personal_database"
         })
     }

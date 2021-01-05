@@ -1,4 +1,5 @@
 const router = require('koa-router')()
+const jsonWebToken = require('jsonwebtoken')
 const { SucessModel, ErrorModel } = require('../model/index.js')
 const { addUser,checkUserName,checkEmail,checkPhone,selectUser } = require('../controller/users')
 router.prefix('/users')
@@ -8,19 +9,24 @@ router.post('/login', async function (ctx, next) {
   if (ctx && ctx.request && ctx.request.body) {
     let body = ctx.request.body
     if (!body.userName) {
-      ctx.body = { msg: "userName不能为空", code: 201 };
+      ctx.body = new ErrorModel('用户名不能为空！')
       return false
     }
     if (!body.userPassWord) {
-      ctx.body = { msg: "userPassWord不能为空", code: 201 };
+      ctx.body = new ErrorModel('密码不能为空！');
       return false
     }
     let name = body.userName
     let password = body.userPassWord
     // sql语句
+    console.log(name,password,'  name&password')
    const [res] = await selectUser(ctx,{name,password})
    if(res){
-    ctx.cookies.set('book', 'liujiangtaoceshi')
+     console.log(res)
+     const {userName,userId} = res
+    //ctx.cookies.set('book', 'liujiangtaoceshi')
+   const jwt = jsonWebToken.sign({ userName,userId }, 'shhhhh')
+   ctx.set('Authorization',jwt)
     ctx.body = new SucessModel('登陆成功')
    }else{
     ctx.body = new ErrorModel('用户名或密码错误！')

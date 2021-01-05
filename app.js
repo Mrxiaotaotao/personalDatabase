@@ -5,6 +5,8 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+const jwt = require('koa-jwt');
+
 const { mysqlMiddleWare } = require('./applaymiddleware/mysqlMiddleWare')
 const { loggerMiddleWare } = require('./applaymiddleware/loggerMiddleWare')
 const index = require('./routes/index')
@@ -30,7 +32,12 @@ app.use(views(__dirname + '/views', {
 
 // logger
 app.use(loggerMiddleWare)
-
+//不要jwt权限验证的接口
+const whiteList = [
+  /^\/users\/login/,
+  /^\/users\/register/
+]
+app.use(jwt({ secret: 'shhhhh' }).unless({ path: whiteList }));//权限验证
 // routes
 app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())

@@ -26,7 +26,7 @@ const checkPhone = async (ctx,body)=>{
 
 const selectUser = async (ctx,body)=>{
     const {name,password} = body
-    let sql = `select * from users where userName = '${name}' and userPassWord=${password}`
+    let sql = `select * from users where userName = '${name}' and userPassWord='${password}'`
     // sql查询
     return await ctx.util.mysql(sql)
 }
