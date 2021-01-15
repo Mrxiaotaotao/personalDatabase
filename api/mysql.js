@@ -6,7 +6,7 @@ let query = (sql, host = '127.0.0.1') => {
         pools[host] = mysql.createPool({//不存在创建
             host: "localhost",
             user: "root",
-            password: "123456",
+            password: "yourpassword",
             database: "personal_database"
         })
     }

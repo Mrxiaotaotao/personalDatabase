@@ -26,12 +26,12 @@ CREATE TABLE `users`  (
   `userId` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `userName` varchar(40) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `userPassWord` varchar(18) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `premission` varchar(3) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT ' ',
+  `premission` varchar(3) CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT ' ',
   `nickname` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `gender` varchar(5) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `info` longtext CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `email` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `phone` varchar(15) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `gender` varchar(5) CHARACTER SET utf8 COLLATE utf8_general_ci ,
+  `info` longtext CHARACTER SET utf8 COLLATE utf8_general_ci ,
+  `email` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci ,
+  `phone` varchar(15) CHARACTER SET utf8 COLLATE utf8_general_ci ,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `userId_UNIQUE`(`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
@@ -39,6 +39,6 @@ CREATE TABLE `users`  (
 -- ----------------------------
 -- Records of users
 -- ----------------------------
-INSERT INTO `users` VALUES (1, '1608803377191', '测试用5', '1234567', '0', 'test', '0', '测试用户', '1234r@qq.com', '11134567901');
+INSERT INTO `users` VALUES (1, '1608803377191', 'root', '123456', '0', 'test', '0', '测试用户', '1234r@qq.com', '11134567901');
 
 SET FOREIGN_KEY_CHECKS = 1;
