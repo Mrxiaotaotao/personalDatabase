@@ -29,7 +29,7 @@ const checkPhone = async (ctx, body) => {
 }
 
 // 修改用户的单个数据
-const checkPhone = async (ctx, body) => {
+const checkKey = async (ctx, body) => {
     const { key, value } = body
     let sql = `select * from users where ${key}='${value}'`
     return await ctx.util.mysql(sql)
@@ -50,5 +50,6 @@ module.exports = {
     checkEmail,
     checkNickname,
     checkPhone,
-    selectUser
+    selectUser,
+    checkKey
 }
