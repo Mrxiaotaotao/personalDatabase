@@ -28,6 +28,13 @@ const checkPhone = async (ctx, body) => {
     return await ctx.util.mysql(sql)
 }
 
+// 修改用户的单个数据
+const checkPhone = async (ctx, body) => {
+    const { key, value } = body
+    let sql = `select * from users where ${key}='${value}'`
+    return await ctx.util.mysql(sql)
+}
+
 
 const selectUser = async (ctx, body) => {
     const { name, password } = body

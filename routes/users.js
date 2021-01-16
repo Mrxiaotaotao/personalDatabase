@@ -31,10 +31,8 @@ router.post('/login', async function (ctx, next) {
     } else {
       ctx.body = new ErrorModel('用户名或密码错误！')
     }
-
-
   } else {
-    ctx.body = new ErrorModel('数据异常')
+    ctx.body = new ErrorModel('查询异常')
   }
 })
 
@@ -48,7 +46,7 @@ router.get('/bar', function (ctx, next) {
  *      password:string--密码
  *      nickname:string -- 昵称
  *      repassword:string --重复确认输入的密码
- *      gender:'0'|'1' ---- 性别
+ *      gender:'0'|'1' ---- 性别 0女 1男
  *      email: string ----邮箱
  *      phone:string ----电话
  *      info:string ---- 自我介绍
@@ -103,8 +101,20 @@ router.post('/register', async function (ctx, next) {
 
 })
 
+/**
+ * 添加、修改用户单个信息
+ * 入参
+ *  id 用户标识
+ *  key 修改标识 nickname gender email phone info
+ *  value 修改后的数据
+ */
 router.post('upDateRegister', function (ctx, next) {
-
+  const { id, key, value } = ctx.request.body;
+  if (!id || !key || !value) {
+    return ctx.body = new ErrorModel('必填项校验不通过')
+  }
+  ctx.body = new SucessModel('修改成功！')
 })
+
 
 module.exports = router
