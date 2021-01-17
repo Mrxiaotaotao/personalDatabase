@@ -23,11 +23,11 @@ router.post('/login', async function (ctx, next) {
     const [res] = await selectUser(ctx, { name, password })
     if (res) {
       console.log(res)
-      const { userName, userId, nickname, gender } = res
+      const { userName, userId, nickname, gender, premission } = res
       //ctx.cookies.set('book', 'liujiangtaoceshi')
       const jwt = jsonWebToken.sign({ userName, userId }, 'shhhhh')
       ctx.set('Authorization', jwt)
-      ctx.body = new SucessModel({ userId, nickname, gender }, '登陆成功')
+      ctx.body = new SucessModel({ userId, nickname, gender, premission }, '登陆成功')
     } else {
       ctx.body = new ErrorModel('用户名或密码错误！')
     }
