@@ -1,7 +1,7 @@
 const router = require('koa-router')()
 const jsonWebToken = require('jsonwebtoken')
 const { SucessModel, ErrorModel } = require('../model/index.js')
-const { addUser, checkUserName, checkEmail, checkPhone, selectUser, checkNickname } = require('../controller/users')
+const { addUser, checkUserName, checkEmail, checkPhone, selectUser, checkNickname, aaaaaa } = require('../controller/users')
 router.prefix('/users')
 //登录接口
 router.post('/login', async function (ctx, next) {
@@ -36,8 +36,8 @@ router.post('/login', async function (ctx, next) {
   }
 })
 
-router.get('/bar', function (ctx, next) {
-  ctx.body = 'this is a users/bar response'
+router.post('/bar', async function (ctx, next) {
+  ctx.body = await aaaaaa(ctx)
 })
 
 //注册--liwen
@@ -108,7 +108,7 @@ router.post('/register', async function (ctx, next) {
  *  key 修改标识 nickname gender email phone info
  *  value 修改后的数据
  */
-router.post('upDateRegister', function (ctx, next) {
+router.post('/upDateRegister', function (ctx, next) {
   const { id, key, value } = ctx.request.body;
   if (!id || !key || !value) {
     return ctx.body = new ErrorModel('必填项校验不通过')

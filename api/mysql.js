@@ -15,8 +15,9 @@ let query = (sql, host = '127.0.0.1') => {
             if (err) console.log(err, '数据库连接失败');
             else connection.query(sql, (err, results) => {//去数据库查询数据
                 connection.release()//释放连接资源
-                if (err) reject(err);
+                if (err) reject(err.sqlMessage);
                 else resolve(results);
+
             })
         })
     })

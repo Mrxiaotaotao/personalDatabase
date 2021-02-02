@@ -32,12 +32,13 @@ app.use(views(__dirname + '/views', {
 
 // logger
 app.use(loggerMiddleWare)
+// 20210202 Mrxiaotaotao 原因 正处于开发阶段暂时关闭，为了方便测试其他接口情况 如有需要请自行解开
 //不要jwt权限验证的接口
-const whiteList = [
-  /^\/users\/login/,
-  /^\/users\/register/
-]
-app.use(jwt({ secret: 'shhhhh' }).unless({ path: whiteList }));//权限验证
+// const whiteList = [
+//   /^\/users\/login/,
+//   /^\/users\/register/
+// ]
+// app.use(jwt({ secret: 'shhhhh' }).unless({ path: whiteList }));//权限验证
 // routes
 app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
