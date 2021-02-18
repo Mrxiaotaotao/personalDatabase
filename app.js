@@ -9,6 +9,7 @@ const jwt = require('koa-jwt');
 
 const { mysqlMiddleWare } = require('./applaymiddleware/mysqlMiddleWare')
 const { loggerMiddleWare } = require('./applaymiddleware/loggerMiddleWare')
+// 这里要改成动态获取路径 和循环挂载到app.use里
 const index = require('./routes/index')
 const users = require('./routes/users')
 
@@ -18,6 +19,9 @@ onerror(app)
  通过一个中间件，把所有的工具关联起来
 */
 app.use(mysqlMiddleWare)
+// logger
+app.use(loggerMiddleWare)
+
 // middlewares
 app.use(bodyparser({
   enableTypes: ['json', 'form', 'text']
@@ -30,8 +34,7 @@ app.use(views(__dirname + '/views', {
   extension: 'pug'
 }))
 
-// logger
-app.use(loggerMiddleWare)
+
 // 20210202 Mrxiaotaotao 原因 正处于开发阶段暂时关闭，为了方便测试其他接口情况 如有需要请自行解开
 //不要jwt权限验证的接口
 // const whiteList = [

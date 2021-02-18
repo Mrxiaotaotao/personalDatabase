@@ -12,7 +12,6 @@ const MySql = require('./mysql')
  */
 const PsqlList = async (table, order = false, orderKey, orderValue = 'ASC') => {
     let sql = orderSqlName(`SELECT * FROM ${table} `, orderKey, orderValue)
-
     return await MySql(sql)
 }
 
@@ -27,7 +26,6 @@ const PsqlList = async (table, order = false, orderKey, orderValue = 'ASC') => {
  */
 const PsqlListSingle = async (table, key, value, orderKey, orderValue = 'ASC') => {
     let sql = await orderSqlName(`SELECT * FROM ${table} WHERE ${key} = ${value}`, orderKey, orderValue)
-
     return await MySql(sql)
 }
 
@@ -65,13 +63,11 @@ const PsqlAdd = (table, data) => {
         keys = keys.slice(0, keys.length - 1)
         values = values.slice(0, values.length - 1)
         let sql = `INSERT INTO ${table} (${keys}) values (${values});`
-        // console.log(MySql(sql), '===0-0');
         return MySql(sql)
 
     } else {
         return { error: '添加失败！' }
     }
-
 }
 
 /**
