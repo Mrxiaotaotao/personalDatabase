@@ -33,5 +33,4 @@ class ErrorModel extends Model {
 module.exports = {
     SucessModel,
     ErrorModel
-
 }
