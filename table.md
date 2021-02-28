@@ -6,6 +6,16 @@ navTable 导航表
     id
     labelName 子导航标签 
     labelId 子标签id
+---***---
+create table navTable (
+	id INT not NULL ,
+	navName Char(12),
+	navType Int(1),
+	labelName Char(12),
+	labelId INT NULL,
+	navFlag  Char(10
+)
+---***---
 
 父表 homeTable 
     热门话题   内容
@@ -16,14 +26,31 @@ navTable 导航表
     icon  大标题图表
     type 大标题类型  card 卡片类型 Banners 横幅 link 链接 List 列表  team 团队 等
     TypeSize 大标题模块大小 默认是4
+
+---***---
+create table homeTable (
+	id INT not NULL ,
+	title Char(12),
+	icon  Char(54),
+	type Char(24),
+	TypeSize 	Int(2)
+)
+---***---
 字表 homeList ß
     字段名
-    fatherID 父级id
+    PId 父级id
     id 子id
     --
     用户博客id 自行查询
     image
-
+---***---
+create table homeList (
+	PId INT NOT NULL,
+	id INT NOT NULL,
+	blogId  INT NOT NULL,
+	img VARCHAR(1024)
+)
+---***---
 用户详情表
     users 用户账号表
         ...
@@ -48,35 +75,72 @@ navTable 导航表
         blogSeeNum 总访问量
         blogNum 文章总量
 
-        真实姓名 暂时不做
-        性别
-        所在地区
-        出生日期
-        开发工作时间
+       actualName   真实姓名 暂时不做
+        gender 性别
+        area 所在地区
+        dateBirth 出生日期
+        developmentTime 开发工作时间
 
-        教育信息
-        学校名称
-        入学时间
-        学历
+        educationalInformation 教育信息
+        schoolName 学校名称
+        admissionTime 入学时间
+        education 学历
         
-        工作信息
-        公司名称
-        职位名称
-        所属行业
+        workInfo 工作信息
+        companyName 公司名称
+        jobTitle 职位名称
+        industry 所属行业
 
         兴趣标签 此为导航标签的子标签
+
+---***---
+create table userInfo (
+	userId INT NOT NULL  comment '用户id 子id',
+	userImg  VARCHAR(10024) comment '头像',
+	original  int not null default 0 comment '原创'   ,
+	ranks int not null default 0 comment '排名'    ,
+	overallRanking int not null default 0 comment '总排名' ,
+	access int not null default 0 comment '访问' ,
+	grade int not null default 0 comment '等级' ,
+	integralNum int not null default 0 comment '积分' ,
+	fansNum int not null default 0 comment '粉丝' ,
+	praisedNum int not null default 0 comment '获赞' ,
+	commentNum int not null default 0 comment '评论' ,
+	favoritesNum int not null default 0 comment '收藏' ,
+	attention int not null default 0 comment '关注' ,
+	userTime DATETIME comment '创建时间',
+	blogSeeNum int not null default 0 comment '总访问量' ,
+	blogNum int not null default 0 comment '文章总量' ,
+	actualName VARCHAR(24) comment '真实姓名',
+	gender INT(1)  comment '性别',
+	areas VARCHAR(104) comment '所在地区',
+	dateBirths DATE comment '出生日期',
+	developmentTime DATE comment '开发工作时间',
+	educationalInformation VARCHAR(104) comment '教育信息',
+	schoolName  VARCHAR(104) comment '学校名称',
+	admissionTime DATE comment '入学时间',
+	education CHAR(24) comment '学历',
+	workInfo  VARCHAR(104) comment '工作信息',
+	companyName VARCHAR(104) comment '公司名称',
+	jobTitle VARCHAR(104) comment '职位名称',
+	industry   VARCHAR(104 ) comment '所属行业'
+)
+---***---
 收藏表
     FavoritesTable
         字段
         id 收藏地址id
         userId 用户id
         blogUserId 此博客用户id
-        pathUrl 文章地址
-        blogType 类型 00 博客
-        title 博客标题
-        blogUser 收藏此博客的用户名
-        blogType 博客类型
-
+        blogId 此博客id
+---***---
+create table favoritesTable (
+id INT NOT NULL COMMENT '收藏ID',
+	userId INT NOT NULL  comment '用户ID',
+	blogUserId INT NOT NULL  comment '此博客用户id',
+	blogId  INT NOT NULL  comment '此博客id'
+)
+---***---
 关注表
     attentionTable
         字段
@@ -84,22 +148,35 @@ navTable 导航表
         userId 用户id
         blogUserId 此博主用户id / 账号名
         attentionId 你所关注的用户id
-        attentionName 你所关注的用户名
-        attentionImage 你所关注的用户头像
+        attentionBlogId 你所关注的用户id
+        attentionType 类型 1 关注博主 0 关注博客
+---***---
+create table attentionTable (
+id INT NOT NULL COMMENT '收藏ID',
+	userId INT NOT NULL  comment '用户ID',
+	attentionId  INT NOT NULL  comment '你所关注的用户id',
+	attentionBlogId INT null   comment '你所关注的用户博客id',
+	attentionType INT(1) NOT NULL comment '类型 1 关注博主 0 关注博客'
+)
+---***---
 粉丝表
     FansTable
         字段
         id
         userId 用户id
         blogUserId 此博客用户id / 账号名
-        attentionId 你粉丝的用户id
-        attentionName 你粉丝的用户名
-        attentionImage 你粉丝的用户头像
-
+        userFansId 你粉丝的用户id
+---***---
+create table fansTable (
+	id INT NOT NULL COMMENT '粉丝ID',
+	userId INT NOT NULL  comment '用户ID',
+	userFansId  INT NOT NULL  comment '你粉丝的用户id'
+)
+---***---
 文章 表
     blogTable 博客表
         字段
-        blogId 博客id
+        Id 博客id
         userId 用户id
         blogClass 文章标签
         blogLabel 文章分类
@@ -116,11 +193,39 @@ navTable 导航表
         content 内容 为html 富文本 
         top 置顶 true 置顶 false 不置顶
         integralNum 积分
+---***---
+create table blogTable (
+	id INT NOT NULL COMMENT '文章ID',
+	userId INT NOT NULL  comment '用户ID',
+	blogClass  VARCHAR(1024) not null comment '文章标签',
+	blogLabel  VARCHAR(1024) not null comment '文章分类',
+    blogType int not null comment '文章类型 00 原创 01 私密 02 粉丝可见 04 vip可见',
+    firstDate DATETIME not null comment '首次添加日期',
+    lastDate  DATETIME not null comment '最后修改日期',
+    favoritesNum int not null default 0 comment '收藏个数' ,
+    likeNum int not null default 0 comment '点赞个数' ,
+    commentNum  int not null default 0 comment '评论个数' ,
+    seeNum int not null default 0 comment '查看个数' ,
+    articleLink VARCHAR(1024) comment '本文链接',
+    userName VARCHAR(1024) comment '用户名',
+    title VARCHAR(1024) comment '标题',
+    content text not null comment '内容 为html 富文本 ',
+    top int not null comment '置顶 0 不置顶 1++ 置顶顺序',
+    integralNum int not null default 0 comment '关注' 
+)
+---***---
 点赞表
     likeTable
         id 唯一id
         userId 点赞用户id
         Pid 父级id
+---***---
+create table likeTable (
+	id INT NOT NULL COMMENT '唯一id',
+	userId INT NOT NULL  comment '点赞用户id',
+	Pid INT NOT NULL  comment '父级id 博客地址'
+)
+---***---
 分类表
     classificationTable
     userId 用户id
@@ -129,12 +234,27 @@ navTable 导航表
     classimage 分类图片 默认有
     classTable 分类总量
     top false 未置顶 true 置顶 只会有一个置顶
+---***---
+create table classificationTable (
+	id INT NOT NULL COMMENT '分类id',
+	userId INT NOT NULL  comment '用户id',
+	className VARCHAR(1024) comment '分类名称',
+	classimage VARCHAR(1024) comment '分类图片 默认有',
+	top INT NOT NULL DEFAULT 0 comment '未置顶 true 置顶 只会有一个置顶'
+)
+---***---
 标签表
     labelTable
     userId 用户id
     id 标签id
     labelName 标签名
-
+---***---
+create table labelTable (
+	id INT NOT NULL COMMENT '标签id',
+	userId INT NOT NULL  comment '用户id',
+	labelName VARCHAR(1024) comment '标签名'
+)
+---***---
 评论表
     commentTable 
         id 评论id
@@ -142,15 +262,25 @@ navTable 导航表
         ParentsId 父级id 为子集的话会有 父级的评论id 一级不会有 / 根据 level 判断
         Level 层级 1 为一级 2 为二级 依次类推
         commentUserId 评论人的id
-        commentUserImage 评论人的头像
-        blogTitle 文章标题
         content 评论内容
         time 插入时间
         Report 被人举报标识 true 有人举报 false 正常 管理员可删除不良评论 默认为空或false
         reportUser 举报人用户id
         likeNum 点赞
-
-
+---***---
+create table commentTable (
+	id INT NOT NULL COMMENT '评论id',
+	blogId INT NOT NULL  comment '文章id',
+	parentsId INT  NULL  comment '父级评论id',
+	level INT(1) comment '层级 1 为一级 2 为二级 依次类推',
+	commentUserId INT NOT NULL COMMENT '评论人的id',
+	content text COMMENT '评论内容',
+	time DATETIME COMMENT '插入/评论时间',
+	report VARCHAR(24) COMMENT '被人举报标识 true 有人举报 false 正常 管理员可删除不良评论 默认为空或false',
+	reportUser INT NULL COMMENT '举报人用户id',
+	likeNum INT NOT NULL DEFAULT 0 COMMENT '点赞数'
+)
+---***---
 近一月的 访问 评论 粉丝 收藏 量 的图
 chartTable
     userId 用户id
