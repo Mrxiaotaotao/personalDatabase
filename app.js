@@ -13,6 +13,17 @@ const { loggerMiddleWare } = require('./applaymiddleware/loggerMiddleWare')
 const index = require('./routes/index')
 const users = require('./routes/users')
 
+
+const koaBody = require('koa-body');
+
+app.use(koaBody({
+  multipart: true,
+  formidable: {
+    // uploadDir: 'public/uploads/file',
+    maxFileSize: 200 * 1024 * 1024 // 设置上传文件大小最大限制，默认2M
+  }
+}))
+
 // error handler
 onerror(app)
 /*
@@ -23,9 +34,9 @@ app.use(mysqlMiddleWare)
 app.use(loggerMiddleWare)
 
 // middlewares
-app.use(bodyparser({
-  enableTypes: ['json', 'form', 'text']
-}))
+// app.use(bodyparser({
+//   enableTypes: ['json', 'form', 'text']
+// }))
 app.use(json())
 app.use(logger())
 app.use(require('koa-static')(__dirname + '/public'))
