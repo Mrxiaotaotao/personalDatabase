@@ -10,8 +10,9 @@ const jwt = require('koa-jwt');
 const { mysqlMiddleWare } = require('./applaymiddleware/mysqlMiddleWare')
 const { loggerMiddleWare } = require('./applaymiddleware/loggerMiddleWare')
 // 这里要改成动态获取路径 和循环挂载到app.use里
-const index = require('./routes/index')
-const users = require('./routes/users')
+// const index = require('./routes/index')
+// const users = require('./routes/users')
+const registerRouter = require('./routes')
 
 
 const koaBody = require('koa-body');
@@ -54,9 +55,9 @@ app.use(views(__dirname + '/views', {
 // ]
 // app.use(jwt({ secret: 'shhhhh' }).unless({ path: whiteList }));//权限验证
 // routes
-app.use(index.routes(), index.allowedMethods())
-app.use(users.routes(), users.allowedMethods())
-
+// app.use(index.routes(), index.allowedMethods())
+// app.use(users.routes(), users.allowedMethods())
+app.use(registerRouter())
 // error-handling
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)

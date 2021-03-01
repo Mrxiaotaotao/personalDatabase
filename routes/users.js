@@ -116,5 +116,8 @@ router.post('/upDateRegister', function (ctx, next) {
   ctx.body = new SucessModel('修改成功！')
 })
 
+router.post('/userInfo', async (ctx, next) => {
+  ctx.body = 'adfasf'
+})
 
 module.exports = router
