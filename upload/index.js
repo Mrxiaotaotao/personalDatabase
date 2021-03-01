@@ -1,7 +1,8 @@
 /**
- * file 文件
- * image 图片
- * avater 头像
+ *  file 上传名对应说明
+ *      file 文件
+ *      image 图片
+ *      avater 头像
  */
 const multer = require('koa-multer'); //加载koa-multer模块
 // 上传 图片

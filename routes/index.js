@@ -31,14 +31,22 @@ router.get('/json', async (ctx, next) => {
 const fs = require('fs');
 
 router.post('/uploads', async (ctx) => {
+  console.log(ctx.request, '[][-=-=-=');
   const file = ctx.request.files.file; // 获取上传文件
-  const reader = fs.createReadStream(file.path); // 创建可读流
-  const upStream = fs.createWriteStream(`public/uploads/file/${Date.now()}_${file.name}`); // 创建可写流
-  reader.pipe(upStream); // 可读流通过管道写入可写流
-  return ctx.body = {
-    filename: ctx.request.files,
-    a: ctx.request.header.host
+  // console.log(file);
+  if (file.path) {
+    const reader = fs.createReadStream(file.path); // 创建可读流
+    const flile_name = Date.now() + "_" + file.name
+    const upStream = fs.createWriteStream(`public/uploads/file/${flile_name}`); // 创建可写流
+    reader.pipe(upStream); // 可读流通过管道写入可写流
+    return ctx.body = {
+      filename: ctx.request.files,
+      a: ctx.request.header['x-forwarded-proto'] + '://' + ctx.request.header.host + '/uploads/file/' + flile_name
+    }
+  } else {
+    return ctx.body = '不能为空'
   }
+
 })
 
 
