@@ -3,24 +3,22 @@ const app = new Koa()
 const views = require('koa-views')
 const json = require('koa-json')
 const onerror = require('koa-onerror')
-const bodyparser = require('koa-bodyparser')
+const bodyparser = require('koa-bodyparser') // 未用到考虑删除
 const logger = require('koa-logger')
 const jwt = require('koa-jwt');
+const jsonWebToken = require('jsonwebtoken')
 
 const { mysqlMiddleWare } = require('./applaymiddleware/mysqlMiddleWare')
 const { loggerMiddleWare } = require('./applaymiddleware/loggerMiddleWare')
-// 这里要改成动态获取路径 和循环挂载到app.use里
-// const index = require('./routes/index')
-// const users = require('./routes/users')
+// routers
 const registerRouter = require('./routes')
-
-
+// body
 const koaBody = require('koa-body');
 
 app.use(koaBody({
   multipart: true,
   formidable: {
-    // uploadDir: 'public/uploads/file',
+    // uploadDir: 'public/uploads/file', // 设置文件存储路径
     maxFileSize: 200 * 1024 * 1024 // 设置上传文件大小最大限制，默认2M
   }
 }))
@@ -34,10 +32,7 @@ app.use(mysqlMiddleWare)
 // logger
 app.use(loggerMiddleWare)
 
-// middlewares
-// app.use(bodyparser({
-//   enableTypes: ['json', 'form', 'text']
-// }))
+// 返回页面处理
 app.use(json())
 app.use(logger())
 app.use(require('koa-static')(__dirname + '/public'))
@@ -46,21 +41,139 @@ app.use(views(__dirname + '/views', {
   extension: 'pug'
 }))
 
-
-// 20210202 Mrxiaotaotao 原因 正处于开发阶段暂时关闭，为了方便测试其他接口情况 如有需要请自行解开
-//不要jwt权限验证的接口
-// const whiteList = [
-//   /^\/users\/login/,
-//   /^\/users\/register/
-// ]
-// app.use(jwt({ secret: 'shhhhh' }).unless({ path: whiteList }));//权限验证
 // routes
-// app.use(index.routes(), index.allowedMethods())
-// app.use(users.routes(), users.allowedMethods())
 app.use(registerRouter())
-// error-handling
+
+// jwt校验及解密处理
+
+//不要jwt权限验证的接口
+const unlessPath = ['/users/login', '/users/register']
+app.use(async (ctx, next) => {
+  if (unlessPath.indexOf(ctx.url) !== -1) {
+    await next()
+  } else {
+    if (ctx.header.cookie) {
+      console.log(ctx.header.cookie, 'liujiangta')
+      let list = ctx.header.cookie.split(';')
+      let token = ''
+      list.forEach(item => {
+        let cookieKey = item.split('=')
+        if (cookieKey[0] == 'Authorization') {
+          token = cookieKey[1]
+        }
+      })
+
+      let payload = jsonWebToken.verify(token || '', 'my_token', (err, decoded) => {
+        if (err) {
+          if (err.name == 'TokenExpiredError') {//token过期
+            let str = {
+              code: 32,
+              iat: 1,
+              exp: 0,
+              msg: 'token过期'
+            }
+            return str;
+          } else if (err.name == 'JsonWebTokenError') {//无效的token
+            let str = {
+              code: 30,
+              iat: 1,
+              exp: 0,
+              msg: '无效的token'
+            }
+            return str;
+          } else {
+            let str = {
+              code: 31,
+              iat: 1,
+              exp: 0,
+              msg: 'token校验失败'
+            }
+            return str
+          }
+        } else {
+          return decoded;
+        }
+      })
+      ctx.request.header = { 'authorization': "Bearer " + (token || '') }
+      //开始时间小于结束时间，代表token还有效
+      if (payload.iat < payload.exp) {
+        await next();
+      } else {
+        ctx.body = payload
+      }
+
+    } else {
+      // 无jwt或恶意清空cookie
+      ctx.body = { code: -4, msg: "无jwt或恶意清空cookie" }
+    }
+
+  }
+})
+
+//不要jwt权限验证的接口
+const whiteList = [
+  /^\/users\/login/,
+  /^\/users\/register/
+]
+// 权限验证
+app.use(jwt({ secret: 'my_token' }).unless({ path: whiteList }));
+
+// 无权限处理异常
+app.use(async (ctx, next) => {
+  // console.log(ctx.status, ctx.error, '9999');
+  return next().then(() => {
+    // 无此路由异常处理 后期兼容更多状态
+    if (ctx.status == 404) {
+      ctx.body = {
+        code: 44,
+        msg: '无此接口地址，请检测您接口地址是否正确！！'
+      }
+    } else if (ctx.status == 500) {
+      ctx.body = {
+        code: 50,
+        msg: '服务器错误，请稍后再试！'
+      }
+    }
+  }).catch((err) => {
+    // console.log(err.status, '测试');
+    // 错误状态处理
+    if (err.status === 401) {
+      ctx.status = 401;
+      ctx.body = {
+        code: 401,
+        msg: err.message,
+        description: 'Protected resource, use Authorization header to get access\n'
+      }
+    } else {
+      throw err;
+    }
+  })
+})
+
+// 监听服务器错误
+// app.use(async (ctx, next) => {
+//   console.log('监听服务器错误');
+//   try {
+//     ctx.error = (code, message) => {
+//       if (typeof code === 'string') {
+//         message = code;
+//         code = 500;
+//       }
+//       ctx.throw(code || 500, message || '服务器错误_1');
+//     };
+//     await next();
+//   } catch (e) {
+//     let status = e.status || 500;
+//     let message = e.message || '服务器错误_2';
+//     ctx.response.body = { status, message };
+//   }
+// });
+
+
+// 错误监听
 app.on('error', (err, ctx) => {
-  console.error('server error', err, ctx)
+  console.error('server error', err.message);
+  console.error(err);
 });
 
 console.log("项目启动http://127.0.0.1:3000")

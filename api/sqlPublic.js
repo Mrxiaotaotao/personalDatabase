@@ -26,6 +26,23 @@ const PsqlList = async (table, order = false, orderKey, orderValue = 'ASC') => {
  */
 const PsqlListSingle = async (table, key, value, orderKey, orderValue = 'ASC') => {
     let sql = await orderSqlName(`SELECT * FROM ${table} WHERE ${key} = ${value}`, orderKey, orderValue)
+    console.log(await MySql(sql), 'sql999');
+    return await MySql(sql)
+}
+/**
+ * 查询单表多条件
+ * @param {*} table  Table Name
+ * @param {*} data he data to be added, the key is the field name, and the value is the field value|| Object
+ * @param {*} orderKey  Sort by that field、 Sort switch
+ * @param {*} orderValue ASC 正序 DESC 倒序
+ */
+const PsqlListMultiple = async (table, data, orderKey, orderValue = 'ASC') => {
+    let keyStr = ''
+    Object.keys(data).forEach(function (key) {
+        keyStr += ` ${key} = '${data[key]}' and`
+    });
+    keyStr = keyStr.slice(0, keyStr.length - 3)
+    let sql = await orderSqlName(`SELECT * FROM ${table} WHERE ${keyStr}`, orderKey, orderValue)
     return await MySql(sql)
 }
 
@@ -64,12 +81,33 @@ const PsqlAdd = (table, data) => {
         values = values.slice(0, values.length - 1)
         let sql = `INSERT INTO ${table} (${keys}) values (${values});`
         return MySql(sql)
-
+        // return new Promise((resolve, reject) => {
+        //     MySql(sql).then(res => {
+        //         resolve({
+        //             name: res
+        //         })
+        //     }).catch(err => {
+        //         resolve({
+        //             name: err
+        //         })
+        //     })
+        // })
     } else {
         return { error: '添加失败！' }
     }
 }
 
+// 修改单个数据
+const PsqlModifyAsingle = async (table, key, value, conditionData) => {
+    let whereStr = ''
+    Object.keys(conditionData).forEach(function (key) {
+        console.log(key, conditionData[key]);
+        whereStr += `${key} = '${conditionData[key]}' and `
+    });
+    whereStr = whereStr.slice(0, whereStr.length - 4)
+    let sql = `UPDATE ${table} SET ${key} = '${value}' WHERE ${whereStr}`
+    return await MySql(sql)
+}
 /**
  * 排序语句过滤
  * @param {*} sql sql statement
@@ -89,5 +127,7 @@ module.exports = {
     PsqlList,
     PsqlLists,
     PsqlListSingle,
-    PsqlAdd
+    PsqlAdd,
+    PsqlListMultiple,
+    PsqlModifyAsingle
 }

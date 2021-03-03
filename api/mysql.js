@@ -1,5 +1,6 @@
 //封装mysql
 const mysql = require('mysql')
+const { customizeModel } = require('../model/index.js')
 let pools = {}//连接池
 let query = (sql, host = '127.0.0.1') => {
     if (!pools.hasOwnProperty(host)) {//是否存在连接池
@@ -15,9 +16,9 @@ let query = (sql, host = '127.0.0.1') => {
             if (err) console.log(err, '数据库连接失败');
             else connection.query(sql, (err, results) => {//去数据库查询数据
                 connection.release()//释放连接资源
-                if (err) reject(err.sqlMessage);
-                else resolve(results);
-
+                if (err) {
+                    resolve(new customizeModel({ sqlMessage: err.sqlMessage, sqlState: err.sqlState, sql: err.sql }, 'sql语法错误', '422'))
+                } else resolve(results)
             })
         })
     })

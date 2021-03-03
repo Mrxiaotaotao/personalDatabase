@@ -13,7 +13,7 @@
  */
 // 用户账号表
 let users = 'users', userInfo = 'userInfo'
-const { PsqlAdd } = require('../api/sqlPublic')
+const { PsqlAdd, PsqlListSingle } = require('../api/sqlPublic')
 
 const addUser = async (ctx, body) => {
     const { userId, username, password, nickname, gender, info, email, phone } = body
@@ -70,17 +70,19 @@ const aaaaaa = async (ctx, box) => {
     // }
     // return list
     let name = ''
-    return new Promise((resolve, reject) => {
-        PsqlAdd(userInfo, { userId2: '2', text: '测试啦' }).then(res => {
-            resolve({
-                name: res
-            })
-        }).catch(err => {
-            resolve({
-                name: err
-            })
-        })
-    })
+    // return PsqlAdd(userInfo, { userId: '2', text: '测试啦' })
+    return PsqlListSingle('users', 'userId', '1610875250805')
+    // return new Promise((resolve, reject) => {
+    //     PsqlAdd(userInfo, { userId: '2', userImg: '测试啦' }).then(res => {
+    //         resolve({
+    //             name: res
+    //         })
+    //     }).catch(err => {
+    //         resolve({
+    //             name: err
+    //         })
+    //     })
+    // })
 
 }
 

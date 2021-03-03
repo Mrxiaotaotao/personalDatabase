@@ -11,7 +11,6 @@ class Model {
         }
         if (msg) {
             this.msg = msg;
-
         }
     }
 }
@@ -30,7 +29,14 @@ class ErrorModel extends Model {
     }
 }
 
+class customizeModel extends Model {
+    constructor(data, msg, code) {
+        super(data, msg);
+        this.code = code
+    }
+}
 module.exports = {
     SucessModel,
-    ErrorModel
+    ErrorModel,
+    customizeModel
 }

@@ -2,8 +2,11 @@ const router = require('koa-router')()
 const jsonWebToken = require('jsonwebtoken')
 const { SucessModel, ErrorModel } = require('../model/index.js')
 const { addUser, checkUserName, checkEmail, checkPhone, selectUser, checkNickname, aaaaaa } = require('../controller/users')
+const { PsqlListMultiple, PsqlModifyAsingle } = require('../api/sqlPublic')
 router.prefix('/users')
+const sqlTableUsers = 'users'
 //登录接口
+// 4月添加管理员动态路由 配置 及用户锁定功能
 router.post('/login', async function (ctx, next) {
   // 参数非空判断
   if (ctx && ctx.request && ctx.request.body) {
@@ -24,21 +27,76 @@ router.post('/login', async function (ctx, next) {
     if (res) {
       console.log(res)
       const { userName, userId, nickname, gender, premission } = res
-      //ctx.cookies.set('book', 'liujiangtaoceshi')
-      const jwt = jsonWebToken.sign({ userName, userId }, 'shhhhh')
+      const jwt = jsonWebToken.sign({ password, userId }, 'my_token', { expiresIn: '100h' })
+      ctx.cookies.set('Authorization', jwt)
       ctx.set('Authorization', jwt)
+      ctx.cookies.set('Premission', premission)
       ctx.body = new SucessModel({ userId, nickname, gender, premission }, '登陆成功')
     } else {
       ctx.body = new ErrorModel('用户名或密码错误！')
     }
   } else {
-    ctx.body = new ErrorModel('查询异常')
+    ctx.body = new ErrorModel('登陆异常-账号密码不能为空')
   }
 })
 
+// 退出接口
+router.post('/logout', async (ctx, next) => {
+  try {
+    ctx.cookies.remove('Authorization')
+    ctx.cookies.remove('Premission')
+    ctx.body = new SucessModel('成功退出')
+  } catch (error) {
+    ctx.body = new ErrorModel(`${error}`)
+  }
+})
+// Forgot password 
+
+// 修改密码接口
+router.post('/changePassword', async (ctx, next) => {
+  const { administrators, username, password, oldPassword, sqlKey = 'userId' } = ctx.request.body;
+  console.log('Liuangt');
+  if (administrators == 2) {
+    // 超级管理权限可以直接根据用户名改或其他唯一值更改密码
+    let keyNameList = ['id', 'userId', 'email', 'phone']
+    console.log(keyNameList.indexOf('user2Id'))
+    if (keyNameList.indexOf('user2Id') == -1) sqlKey = 'userId';
+    let [userFlag] = PsqlListSingle(sqlTableUsers, sqlKey, username)
+    if (userFlag) {
+      let upPass = await PsqlModifyAsingle(sqlTableUsers, 'userPassWord', password, { userId: username })
+      if (upPass) {
+        ctx.body = new SucessModel('密码修改成功')
+      } else {
+        ctx.body = new ErrorModel('修改失败')
+      }
+    } else {
+      ctx.body = new ErrorModel("用户名或密码不正确")
+    }
+  } else {
+    // 用户及管理员处理方式
+    if (username && password && oldPassword) {
+      let [userFlag] = await PsqlListMultiple(sqlTableUsers, { 'userId': username, userPassWord: oldPassword })
+      if (userFlag) {
+        let upPass = await PsqlModifyAsingle(sqlTableUsers, 'userPassWord', password, { userId: username })
+        if (upPass) {
+          ctx.body = new SucessModel('密码修改成功')
+        } else {
+          ctx.body = new ErrorModel('修改失败')
+        }
+      } else {
+        ctx.body = new ErrorModel("用户名或密码不正确")
+      }
+    } else {
+      ctx.body = new ErrorModel('缺少参数')
+    }
+  }
+
+})
+// 测试接口
 router.post('/bar', async function (ctx, next) {
   ctx.body = await aaaaaa(ctx)
 })
+
 
 //注册--liwen
 /**
@@ -50,7 +108,7 @@ router.post('/bar', async function (ctx, next) {
  *      email: string ----邮箱
  *      phone:string ----电话
  *      info:string ---- 自我介绍
- *      administrators  管理员标注位 true 管理员 false 用户
+ *      administrators  管理员标注位 0 用户 1 管理员 2 超级管理员 
  */
 
 router.post('/register', async function (ctx, next) {
@@ -116,6 +174,7 @@ router.post('/upDateRegister', function (ctx, next) {
   ctx.body = new SucessModel('修改成功！')
 })
 
+// 个人数据添加
 router.post('/userInfo', async (ctx, next) => {
   ctx.body = 'adfasf'
 })
