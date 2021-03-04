@@ -13,7 +13,9 @@
  */
 // 用户账号表
 let users = 'users', userInfo = 'userInfo'
-const { PsqlAdd, PsqlListSingle } = require('../api/sqlPublic')
+let SqlTableUser = 'users'
+const { PsqlAdd, PsqlListSingle, PsqlListMultiple } = require('../api/sqlPublic')
+// const { PsqlListMultiple } = require('../api/sqlPublic')
 
 const addUser = async (ctx, body) => {
     const { userId, username, password, nickname, gender, info, email, phone } = body
@@ -85,7 +87,140 @@ const aaaaaa = async (ctx, box) => {
     // })
 
 }
+// ************************——————————************************
+const jsonWebToken = require('jsonwebtoken')
+const { requiredItem } = require('./index')
+const { SucessModel, ErrorModel } = require('../model/index.js')
 
+
+// 登录接口
+const users_login = async (ctx) => {
+    try {
+        // 必填项判断
+        if (requiredItem(ctx, { userName: '用户名不能为空！', userPassWord: '密码不能为空！' })) {
+            let body = ctx.request.body
+            let name = body.userName
+            let password = body.userPassWord
+            // sql查询
+            const [res] = await PsqlListMultiple(SqlTableUser, { userName: name, userPassWord: password })
+            if (res) {
+
+                const { userName, userId, nickname, gender, premission } = res
+                const jwt = jsonWebToken.sign({ password, userId }, 'my_token', { expiresIn: premission == 0 ? (24 * 7) + 'h' : '2h' })
+                ctx.cookies.set('Authorization', jwt)
+                ctx.set('Authorization', jwt)
+                ctx.cookies.set('Premission', premission)
+                ctx.body = new SucessModel({ userName, userId, nickname, gender, premission }, '登陆成功')
+
+            } else {
+                ctx.body = new ErrorModel('用户名或密码错误！')
+            }
+        }
+    } catch (error) {
+        ctx.body = new ErrorModel(error)
+    }
+}
+
+// 退出
+const users_logout = (ctx) => {
+    try {
+        ctx.cookies.set('Authorization', '', { signed: false, maxAge: 0 })
+        ctx.cookies.set('Premission', '', { signed: false, maxAge: 0 })
+        ctx.body = new SucessModel('成功退出')
+    } catch (error) {
+        ctx.body = new ErrorModel(`${error}`)
+    }
+}
+
+// 注册
+const users_register = async (ctx) => {
+    try {
+        const { administrators, username, password, repassword, nickname } = ctx.request.body;
+        // 生成id
+        const userId = new Date().getTime().toFixed(0)
+
+        if (administrators) {
+            // 管理员
+            const { gender, info, email, phone } = ctx.request.body;
+            console.log(username, password, nickname, repassword, gender, info, email, phone, 'oiasdfoi茜')
+
+            if (requiredItem(ctx, { username, password, nickname, repassword, gender, info, email, phone })) {
+                let checkName = await users_register_check(username, password, repassword, nickname)
+                if (checkName) {
+                    return ctx.body = new ErrorModel(checkName)
+                }
+                const [res2] = await PsqlListSingle(SqlTableUser, 'email', email);//该邮箱是否注册过 
+                const [res3] = await PsqlListSingle(SqlTableUser, 'phone', phone)//该号码是否注册过
+                if (res2) {
+                    return ctx.body = new ErrorModel('该邮箱已被注册！')
+                }
+                if (res3) {
+                    return ctx.body = new ErrorModel('该手机号已被注册！')
+                }
+                let tableValueData = {
+                    id: userId,
+                    userId: username,
+                    userName: '',
+                    userPassWord: password,
+                    premission: '1',
+                    nickname,
+                    gender,
+                    info,
+                    email,
+                    phone
+                }
+                const data = await PsqlAdd(SqlTableUser, tableValueData)
+                console.log(data.protocol41, 'asdfas');
+                if (!data.protocol41) {
+                    return ctx.body = data
+                }
+            }
+        } else {
+            // 用户
+            const { username } = ctx.request.body;
+            if (requiredItem(ctx, { username, password, nickname, repassword })) {
+                let checkName = await users_register_check(username, password, repassword, nickname)
+                if (checkName) {
+                    return ctx.body = new ErrorModel(checkName)
+                }
+                let tableValueData = {
+                    id: userId,
+                    userId: username,
+                    userName: '',
+                    userPassWord: password,
+                    premission: '0',
+                    nickname
+                }
+                const data = await PsqlAdd(SqlTableUser, tableValueData)
+                if (!data.protocol41) {
+                    return ctx.body = data
+                }
+            }
+        }
+
+        ctx.body = new SucessModel('注册成功！')
+    } catch (error) {
+        ctx.body = new ErrorModel('error')
+    }
+}
+
+// 注册中校验公共方法
+const users_register_check = async (username, password, repassword, nickname) => {
+    if (password != repassword) {
+        return '两次密码输入不一致！'
+    }
+
+    //用户名是否注册过
+    const [user] = await PsqlListSingle(SqlTableUser, 'userId', username);
+    if (user) {
+        return '该用户名或账号已注册！'
+    }
+
+    const [nick] = await PsqlListSingle(SqlTableUser, 'nickname', nickname)
+    if (nick) {
+        return '该昵称已存在！'
+    }
+}
 
 module.exports = {
     addUser,
@@ -95,5 +230,8 @@ module.exports = {
     checkPhone,
     selectUser,
     checkKey,
-    aaaaaa
+    aaaaaa,
+    users_login,
+    users_logout,
+    users_register
 }

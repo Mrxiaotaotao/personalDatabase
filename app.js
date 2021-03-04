@@ -150,26 +150,6 @@ app.use(async (ctx, next) => {
   })
 })
 
-// 监听服务器错误
-// app.use(async (ctx, next) => {
-//   console.log('监听服务器错误');
-//   try {
-//     ctx.error = (code, message) => {
-//       if (typeof code === 'string') {
-//         message = code;
-//         code = 500;
-//       }
-//       ctx.throw(code || 500, message || '服务器错误_1');
-//     };
-//     await next();
-//   } catch (e) {
-//     let status = e.status || 500;
-//     let message = e.message || '服务器错误_2';
-//     ctx.response.body = { status, message };
-//   }
-// });
-
-
 // 错误监听
 app.on('error', (err, ctx) => {
   console.error('server error', err.message);
