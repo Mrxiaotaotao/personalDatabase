@@ -38,7 +38,6 @@ const PsqlModifyAsingle = async (table, modifyData, conditionData) => {
     let whereStr = '', data = '';
     // 条件
     Object.keys(conditionData).forEach(function (key) {
-        console.log(key, conditionData[key]);
         whereStr += `${key} = '${conditionData[key]}' and `
     });
     whereStr = whereStr.slice(0, whereStr.length - 4)
@@ -48,7 +47,6 @@ const PsqlModifyAsingle = async (table, modifyData, conditionData) => {
         data += `${key} = "${modifyData[key]}" , `
     });
     data = data.slice(0, data.length - 2)
-
     let sql = `UPDATE ${table} SET ${data} WHERE ${whereStr}`
     return await MySql(sql)
 }

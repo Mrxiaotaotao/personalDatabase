@@ -27,7 +27,6 @@ const PsqlList = async (table, order = false, orderKey, orderValue = 'ASC') => {
  */
 const PsqlListSingle = async (table, key, value, orderKey, orderValue = 'ASC') => {
     let sql = await orderSqlName(`SELECT * FROM ${table} WHERE ${key} = '${value}'`, orderKey, orderValue)
-    console.log(await MySql(sql), 'sql999');
     return await MySql(sql)
 }
 /**

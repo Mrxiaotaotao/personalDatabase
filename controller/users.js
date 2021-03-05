@@ -14,7 +14,7 @@
 // 用户账号表
 let users = 'users', userInfo = 'userInfo'
 let SqlTableUser = 'users'
-const { PsqlAdd, PsqlListSingle, PsqlListMultiple } = require('../api/sqlPublic')
+const { PsqlAdd, PsqlListSingle, PsqlListMultiple, PsqlModifyAsingle } = require('../api/sqlPublic')
 // const { PsqlListMultiple } = require('../api/sqlPublic')
 
 const addUser = async (ctx, body) => {
@@ -204,6 +204,59 @@ const users_register = async (ctx) => {
     }
 }
 
+// 修改密码
+const users_changePassword = async (ctx) => {
+    const { administrators, username, password, oldPassword, sqlKey = 'userId' } = ctx.request.body;
+    console.log('Liuangt');
+    if (administrators == 2) {
+        if (requiredItem(ctx, { username, password })) {
+            // 超级管理权限可以直接根据用户名改或其他唯一值更改密码
+            let keyNameList = ['id', 'userId', 'email', 'phone']
+            if (keyNameList.indexOf(sqlKey) == -1) sqlKey = 'userId';
+            let [userFlag] = await PsqlListSingle(SqlTableUser, sqlKey, username)
+            if (userFlag) {
+                let data = {}
+                data[sqlKey] = username
+                let upPass = await PsqlModifyAsingle(SqlTableUser, { 'userPassWord': password }, data)
+                if (upPass.protocol41) {
+                    ctx.body = new SucessModel('密码修改成功')
+                } else {
+                    return ctx.body = upPass
+                }
+            } else {
+                ctx.body = new ErrorModel("用户名或密码不正确")
+            }
+        }
+    } else {
+        // 用户及管理员处理方式
+        if (requiredItem(ctx, { username, password, oldPassword })) {
+            let [userFlag] = await PsqlListMultiple(SqlTableUser, { 'userId': username, userPassWord: oldPassword })
+            if (userFlag) {
+                let upPass = await PsqlModifyAsingle(SqlTableUser, { 'userPassWord': password }, { 'userId': username, userPassWord: oldPassword })
+                if (upPass.protocol41) {
+                    ctx.body = new SucessModel('密码修改成功')
+                } else {
+                    return ctx.body = upPass
+                }
+            } else {
+                ctx.body = new ErrorModel("未查询到此用户或密码不正确")
+            }
+        }
+    }
+}
+
+// 修改用户单个信息
+const users_upDateRegister = async (ctx) => {
+    if (requiredItem(ctx, ctx.request.body)) {
+        ctx.body = new SucessModel('修改成功！')
+    }
+    // const { id, key, value } = ctx.request.body;
+    // if (!id || !key || !value) {
+    //   return ctx.body = new ErrorModel('必填项校验不通过')
+    // }
+
+    // ctx.body = new SucessModel('修改成功！')
+}
 // 注册中校验公共方法
 const users_register_check = async (username, password, repassword, nickname) => {
     if (password != repassword) {
@@ -223,15 +276,10 @@ const users_register_check = async (username, password, repassword, nickname) =>
 }
 
 module.exports = {
-    addUser,
-    checkUserName,
-    checkEmail,
-    checkNickname,
-    checkPhone,
-    selectUser,
-    checkKey,
     aaaaaa,
-    users_login,
+    // users_login,
     users_logout,
-    users_register
+    users_register,
+    users_changePassword,
+    users_upDateRegister
 }

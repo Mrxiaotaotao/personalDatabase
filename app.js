@@ -3,11 +3,11 @@ const app = new Koa()
 const views = require('koa-views')
 const json = require('koa-json')
 const onerror = require('koa-onerror')
-const bodyparser = require('koa-bodyparser') // 未用到考虑删除
 const logger = require('koa-logger')
 const jwt = require('koa-jwt');
 const jsonWebToken = require('jsonwebtoken')
-
+// const logsUtil = require('./utils/logs.js'); // 日志文件输出
+// 中间件引用
 const { mysqlMiddleWare } = require('./applaymiddleware/mysqlMiddleWare')
 const { loggerMiddleWare } = require('./applaymiddleware/loggerMiddleWare')
 // routers
@@ -15,6 +15,10 @@ const registerRouter = require('./routes')
 // body
 const koaBody = require('koa-body');
 
+// error handler
+onerror(app)
+
+// 上传文件配置
 app.use(koaBody({
   multipart: true,
   formidable: {
@@ -23,28 +27,44 @@ app.use(koaBody({
   }
 }))
 
-// error handler
-onerror(app)
+/**
+ * 日志文件输出
+ */
+// app.use(async (ctx, next) => {
+//   // 响应开始时间
+//   const start = new Date();
+//   // 响应间隔时间                          
+//   let intervals;
+//   try {
+//     await next();
+//     intervals = new Date() - start;
+//     //记录响应日志
+//     logsUtil.logResponse(ctx, intervals);
+//   } catch (error) {
+//     intervals = new Date() - start;
+//     //记录异常日志
+//     logsUtil.logError(ctx, error, intervals);
+//   }
+// })
+
 /*
  通过一个中间件，把所有的工具关联起来
 */
 app.use(mysqlMiddleWare)
-// logger
 app.use(loggerMiddleWare)
 
-// 返回页面处理
+// 返回数据处理
 app.use(json())
+// logger
 app.use(logger())
+// 返回页面处理
 app.use(require('koa-static')(__dirname + '/public'))
-
 app.use(views(__dirname + '/views', {
   extension: 'pug'
 }))
 
 // routes
 app.use(registerRouter())
-
-// jwt校验及解密处理
 
 //不要jwt权限验证的接口
 const unlessPath = ['/users/login', '/users/register']
@@ -62,7 +82,7 @@ app.use(async (ctx, next) => {
           token = cookieKey[1]
         }
       })
-
+      // jwt校验及解密处理
       let payload = jsonWebToken.verify(token || '', 'my_token', (err, decoded) => {
         if (err) {
           if (err.name == 'TokenExpiredError') {//token过期
@@ -151,9 +171,8 @@ app.use(async (ctx, next) => {
 })
 
 // 错误监听
-app.on('error', (err, ctx) => {
+app.on('error', (err) => {
   console.error('server error', err.message);
-  console.error(err);
 });
 
 console.log("项目启动http://127.0.0.1:3000")
