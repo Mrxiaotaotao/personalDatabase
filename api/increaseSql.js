@@ -27,9 +27,8 @@ const PsqlAdd = async (table, data) => {
     }
 }
 
-// 修改单个数据
 /**
- * 
+ * 修改单个数据
  * @param {*} table table name
  * @param {*} modifyData Modified  data | type obj
  * @param {*} conditionData Conditional data | type obj

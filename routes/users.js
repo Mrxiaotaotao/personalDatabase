@@ -1,6 +1,14 @@
 const router = require('koa-router')()
 router.prefix('/users')
-const { users_login, users_logout, users_register, users_changePassword, users_upDateRegister, aaaaaa } = require('../controller/users')
+const {
+  users_login,
+  users_logout,
+  users_register,
+  users_changePassword,
+  users_upDateRegister,
+  users_userInfo,
+  aaaaaa
+} = require('../controller/users')
 
 // 登录接口
 // 4月添加管理员动态路由 配置 及用户锁定功能
@@ -49,11 +57,9 @@ router.post('/upDateRegister', async (ctx) => {
   await users_upDateRegister(ctx)
 })
 
-// 个人数据添加
+// 个人数据添加及修改
 router.post('/userInfo', async (ctx) => {
-
-  ctx.body = 'liujiangto'
-
+  await users_userInfo(ctx)
 })
 
 // 测试接口

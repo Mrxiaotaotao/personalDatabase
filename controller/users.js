@@ -12,55 +12,12 @@
  * 过滤层 还需要有一个返回值的过滤 来判断是否成功 不成功的话返回失败原因
  */
 // 用户账号表
-let users = 'users', userInfo = 'userInfo'
-let SqlTableUser = 'users'
+const jsonWebToken = require('jsonwebtoken')
+const { requiredItem } = require('./index')
 const { PsqlAdd, PsqlListSingle, PsqlListMultiple, PsqlModifyAsingle } = require('../api/sqlPublic')
-// const { PsqlListMultiple } = require('../api/sqlPublic')
+const { SucessModel, ErrorModel } = require('../model/index.js')
+const SqlTableUser = 'users', SqlTableUserInfo = 'userInfo'
 
-const addUser = async (ctx, body) => {
-    const { userId, username, password, nickname, gender, info, email, phone } = body
-    let sql = `INSERT INTO personal_database.users (userId,userName,userPassWord,premission,nickname,gender,info,email,phone) values ('${userId}','${username}','${password}',0,'${nickname}','${gender}','${info}','${email}','${phone}');`
-    return await ctx.util.mysql(sql)
-}
-
-const checkUserName = async (ctx, body) => {
-    const { username } = body
-    let sql = `select * from users where userName='${username}'`
-    return await ctx.util.mysql(sql)
-}
-
-const checkEmail = async (ctx, body) => {
-    const { email } = body
-    let sql = `select * from users where email='${email}'`
-    return await ctx.util.mysql(sql)
-}
-
-const checkNickname = async (ctx, body) => {
-    const { nickname } = body
-    let sql = `select * from users where nickname='${nickname}'`
-    return await ctx.util.mysql(sql)
-}
-
-const checkPhone = async (ctx, body) => {
-    const { phone } = body
-    let sql = `select * from users where phone='${phone}'`
-    return await ctx.util.mysql(sql)
-}
-
-// 修改用户的单个数据
-const checkKey = async (ctx, body) => {
-    const { key, value } = body
-    let sql = `select * from users where ${key}='${value}'`
-    return await ctx.util.mysql(sql)
-}
-
-
-const selectUser = async (ctx, body) => {
-    const { name, password } = body
-    let sql = `select * from users where userName = '${name}' and userPassWord='${password}'`
-    // sql查询
-    return await ctx.util.mysql(sql)
-}
 
 // 测试多层数据
 const aaaaaa = async (ctx, box) => {
@@ -88,10 +45,6 @@ const aaaaaa = async (ctx, box) => {
 
 }
 // ************************——————————************************
-const jsonWebToken = require('jsonwebtoken')
-const { requiredItem } = require('./index')
-const { SucessModel, ErrorModel } = require('../model/index.js')
-
 
 // 登录接口
 const users_login = async (ctx) => {
@@ -257,6 +210,27 @@ const users_upDateRegister = async (ctx) => {
 
     // ctx.body = new SucessModel('修改成功！')
 }
+
+// 个人数据添加及修改
+const users_userInfo = async (ctx, deflag = false) => {
+    ctx.body = 'adsf'
+    if (deflag) {
+        // 添加用户对应的详情表添加
+        const data = await PsqlAdd(SqlTableUserInfo, { userId: deflag })
+        if (!data.protocol41) {
+            return ctx.body = data
+        }
+    } else {
+        // 默认为修改个人数据
+        const userId = new Date().getTime().toFixed(0)
+        // nodejs生成UID（唯一标识符）——node-uuid模块
+        const data = await PsqlAdd(SqlTableUserInfo, { userId })
+        if (!data.protocol41) {
+            return ctx.body = data
+        }
+    }
+}
+
 // 注册中校验公共方法
 const users_register_check = async (username, password, repassword, nickname) => {
     if (password != repassword) {
@@ -277,9 +251,10 @@ const users_register_check = async (username, password, repassword, nickname) =>
 
 module.exports = {
     aaaaaa,
-    // users_login,
+    users_login,
     users_logout,
     users_register,
     users_changePassword,
-    users_upDateRegister
+    users_upDateRegister,
+    users_userInfo,
 }
