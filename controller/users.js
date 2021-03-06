@@ -147,6 +147,8 @@ const users_register = async (ctx) => {
                 const data = await PsqlAdd(SqlTableUser, tableValueData)
                 if (!data.protocol41) {
                     return ctx.body = data
+                } else {
+                    users_userInfo(ctx, userId)
                 }
             }
         }
@@ -213,10 +215,9 @@ const users_upDateRegister = async (ctx) => {
 
 // 个人数据添加及修改
 const users_userInfo = async (ctx, deflag = false) => {
-    ctx.body = 'adsf'
     if (deflag) {
         // 添加用户对应的详情表添加
-        const data = await PsqlAdd(SqlTableUserInfo, { userId: deflag })
+        const data = await PsqlAdd(SqlTableUserInfo, { userId: deflag, userImg: '/uploads/avater/user.jpeg' })
         if (!data.protocol41) {
             return ctx.body = data
         }
@@ -229,6 +230,7 @@ const users_userInfo = async (ctx, deflag = false) => {
             return ctx.body = data
         }
     }
+    return ctx.body = new SucessModel('个人数据修改成功')
 }
 
 // 注册中校验公共方法
