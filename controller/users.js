@@ -55,7 +55,7 @@ const users_login = async (ctx) => {
             let name = body.userName
             let password = body.userPassWord
             // sql查询
-            const [res] = await PsqlListMultiple(SqlTableUser, { userName: name, userPassWord: password })
+            const [res] = await PsqlListMultiple(SqlTableUser, { userId: name, userPassWord: password })
             if (res) {
 
                 const { userName, userId, nickname, gender, premission } = res
@@ -216,19 +216,40 @@ const users_upDateRegister = async (ctx) => {
 // 个人数据添加及修改
 const users_userInfo = async (ctx, deflag = false) => {
     if (deflag) {
-        // 添加用户对应的详情表添加
+        // 添加用户及管理员对应的详情表添加
+        // nodejs生成UID（唯一标识符）——node-uuid模块
         const data = await PsqlAdd(SqlTableUserInfo, { userId: deflag, userImg: '/uploads/avater/user.jpeg' })
         if (!data.protocol41) {
             return ctx.body = data
         }
     } else {
         // 默认为修改个人数据
-        const userId = new Date().getTime().toFixed(0)
-        // nodejs生成UID（唯一标识符）——node-uuid模块
-        const data = await PsqlAdd(SqlTableUserInfo, { userId })
-        if (!data.protocol41) {
-            return ctx.body = data
+        const { infoType, userId } = ctx.request.body
+        let data = {}
+        if (infoType == '1') {
+            console.log('900');
+            const { userName, actualName, gender, info, areas, dateBirths, developmentTime } = ctx.request.body
+            const userChangeData = await PsqlModifyAsingle(SqlTableUser, { userName, info }, { id: userId })
+            console.log(userChangeData, '--=--');
+            if (!userChangeData.protocol41) {
+                return ctx.body = userChangeData
+            }
+            data = { actualName, gender, areas, dateBirths, developmentTime }
+        } else if (infoType == '2') {
+            const { educationalInformation, schoolName, admissionTime, education } = ctx.request.body
+            data = { educationalInformation, schoolName, admissionTime, education }
+        } else if (infoType == '3') {
+            const { workInfo, companyName, jobTitle, industry } = ctx.request.body
+            data = { workInfo, companyName, jobTitle, industry }
+        } else {
+            // 其他处理方式
         }
+
+        const changeData = await PsqlModifyAsingle(SqlTableUserInfo, data, { userId })
+        if (!changeData.protocol41) {
+            return ctx.body = changeData
+        }
+
     }
     return ctx.body = new SucessModel('个人数据修改成功')
 }

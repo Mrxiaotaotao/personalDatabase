@@ -27,30 +27,6 @@ const PsqlAdd = async (table, data) => {
     }
 }
 
-/**
- * 修改单个数据
- * @param {*} table table name
- * @param {*} modifyData Modified  data | type obj
- * @param {*} conditionData Conditional data | type obj
- */
-const PsqlModifyAsingle = async (table, modifyData, conditionData) => {
-    let whereStr = '', data = '';
-    // 条件
-    Object.keys(conditionData).forEach(function (key) {
-        whereStr += `${key} = '${conditionData[key]}' and `
-    });
-    whereStr = whereStr.slice(0, whereStr.length - 4)
-    // 修改的数据
-    Object.keys(modifyData).forEach(function (key) {
-        console.log(key, modifyData[key]);
-        data += `${key} = "${modifyData[key]}" , `
-    });
-    data = data.slice(0, data.length - 2)
-    let sql = `UPDATE ${table} SET ${data} WHERE ${whereStr}`
-    return await MySql(sql)
-}
-
 module.exports = {
     PsqlAdd,
-    PsqlModifyAsingle,
 }

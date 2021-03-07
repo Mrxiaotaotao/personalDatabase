@@ -77,8 +77,8 @@ create table homeList (
 
        actualName   真实姓名 暂时不做
         gender 性别
-        area 所在地区
-        dateBirth 出生日期
+        areas 所在地区
+        dateBirths 出生日期
         developmentTime 开发工作时间
 
         educationalInformation 教育信息

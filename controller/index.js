@@ -28,5 +28,13 @@ const requiredItem = (ctx, data) => {
     return flag
 }
 
+const userNum = (ctx, data) => {
+    try {
 
-module.exports = { requiredItem }
+    } catch (error) {
+
+    }
+}
+
+
+module.exports = { requiredItem, userNum }
