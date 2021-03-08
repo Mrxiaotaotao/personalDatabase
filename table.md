@@ -6,6 +6,7 @@ navTable 导航表
     id
     labelName 子导航标签 
     labelId 子标签id
+    navFlag 开关
 ---***---
 create table navTable (
 	id INT not NULL ,
@@ -13,7 +14,7 @@ create table navTable (
 	navType Int(1),
 	labelName Char(12),
 	labelId INT NULL,
-	navFlag  Char(10
+	navFlag  Char(10)
 )
 ---***---
 

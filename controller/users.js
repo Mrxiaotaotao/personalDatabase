@@ -227,10 +227,8 @@ const users_userInfo = async (ctx, deflag = false) => {
         const { infoType, userId } = ctx.request.body
         let data = {}
         if (infoType == '1') {
-            console.log('900');
             const { userName, actualName, gender, info, areas, dateBirths, developmentTime } = ctx.request.body
             const userChangeData = await PsqlModifyAsingle(SqlTableUser, { userName, info }, { id: userId })
-            console.log(userChangeData, '--=--');
             if (!userChangeData.protocol41) {
                 return ctx.body = userChangeData
             }
