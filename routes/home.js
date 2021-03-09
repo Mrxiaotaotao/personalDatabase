@@ -4,6 +4,7 @@ router.prefix('/home')
 const {
     home_query,
     home_navQuery,
+    home_navHome,
     home_addItem,
     home_upItem,
     home_upNavList
@@ -17,6 +18,10 @@ router.post('/query', async (ctx) => {
 // 首页导航查询
 router.post('/navQuery', async (ctx) => {
     await home_navQuery(ctx)
+})
+
+router.post('/navHome', async (ctx) => {
+    await home_navHome(ctx)
 })
 
 // 首页列表添加

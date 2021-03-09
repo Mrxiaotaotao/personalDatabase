@@ -11,7 +11,7 @@ const MySql = require('./mysql')
  * @param {*} orderValue ASC 正序 DESC 倒序
  * @returns Array
  */
-const PsqlList = async (table, order = false, orderKey, orderValue = 'ASC') => {
+const PsqlList = async (table, orderKey, orderValue = 'ASC') => {
     let sql = orderSqlName(`SELECT * FROM ${table} `, orderKey, orderValue)
     return await MySql(sql)
 }
