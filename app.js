@@ -63,17 +63,14 @@ app.use(views(__dirname + '/views', {
   extension: 'pug'
 }))
 
-// routes
-app.use(registerRouter())
-
 //不要jwt权限验证的接口
 const unlessPath = ['/users/login', '/users/register']
+// jwt验证处理方法
 app.use(async (ctx, next) => {
   if (unlessPath.indexOf(ctx.url) !== -1) {
     await next()
   } else {
     if (ctx.header.cookie) {
-      console.log(ctx.header.cookie, 'liujiangta')
       let list = ctx.header.cookie.split(';')
       let token = ''
       list.forEach(item => {
@@ -140,7 +137,6 @@ app.use(jwt({ secret: 'my_token' }).unless({ path: whiteList }));
 
 // 无权限处理异常
 app.use(async (ctx, next) => {
-  // console.log(ctx.status, ctx.error, '9999');
   return next().then(() => {
     // 无此路由异常处理 后期兼容更多状态
     if (ctx.status == 404) {
@@ -169,6 +165,9 @@ app.use(async (ctx, next) => {
     }
   })
 })
+
+// routes
+app.use(registerRouter())
 
 // 错误监听
 app.on('error', (err) => {

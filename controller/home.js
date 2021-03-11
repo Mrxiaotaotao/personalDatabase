@@ -6,7 +6,7 @@ const SqlTableHomeTable = 'homeTable',
     SqlTableBlogTable = 'blogTable',
     SqlTableNavTable = 'navTable',
     SqlTableNavHome = 'navHome';
-
+let sortsNum = 100;
 // 首页列表查询
 const home_query = async (ctx) => {
     try {
@@ -119,10 +119,93 @@ const home_addItem = async (ctx) => {
     }
 }
 
+/**
+itemType  home 
+{
+    "id":"2222",
+    "itemType":"home",
+    "title":"涛涛测试",
+    "icon":"el-icon",
+    "type":"links"
+}
+item table
+{
+    "id":"1615277627710",
+    "itemType":"table",
+    "blogId":"1211111",
+    "img":"xxx.png"
+}
+{
+    "id":"1615277627710",
+    "itemType":"table",
+    "link":"www.baidu.com",
+    "linkName":"namexxx"
+}
+{
+    "Pid":"1615277627710",
+    "itemType":"table",
+    "link":"www.baidu.com",
+    "linkName":"namexxx"
+}
+{
+    "msg": "添加数据成功 / 修改成功",
+    "code": 0
+}
+
+
+ */
 // 首页列表配置及修改
 const home_upItem = async (ctx) => {
     try {
+        // type  - home - table 
+        let { id, itemType } = ctx.request.body,
+            itemObj = {},
+            table = SqlTableHomeTable;
+        if (itemType == 'home') {
+            let { title, icon, type, TypeSize = 4, orders = sortsNum++ } = ctx.request.body
+            itemObj = { title, icon, type, TypeSize, orders }
+            table = SqlTableHomeTable
+        } else if (itemType == 'table') {
+            console.log('911');
+            let { Pid, blogId = '', img = '', link = '', linkName = '' } = ctx.request.body
+            if (Pid) {
+                let listId = new Date().getTime().toFixed(0)
+                console.log('090asdf');
+                if (requiredItem(ctx, { blogId, img }) || requiredItem(ctx, { link, linkName })) {
+                    let data = await PsqlAdd(SqlTableHomeList, { id: listId, Pid, blogId, img, link, linkName })
+                    // 有父级id则为添加数据
+                    return ctx.body = new SucessModel("添加数据成功")
+                } else {
+                    return ctx.body = new ErrorModel('数据传入异常')
+                }
+            } else {
+                // 修改数据
+                if (blogId && img) {
+                    itemObj = { blogId, img }
 
+                } else if (link, linkName) {
+                    itemObj = { link, linkName }
+
+                } else {
+                    return new ErrorModel('缺少传项')
+                }
+                table = SqlTableHomeList
+            }
+        } else {
+            return ctx.body = new ErrorModel('类型错误')
+        }
+        console.log('--[[]');
+        if (requiredItem(ctx, { id, ...itemObj })) {
+            const queryId = await PsqlListSingle(table, 'id', id)
+            console.log(queryId[0]);
+            if (!queryId[0]) { return ctx.body = new ErrorModel('未查询到此id，修改失败') }
+            let data = await PsqlModifyAsingle(table, { ...itemObj }, { id })
+            if (!data.protocol41) {
+                return ctx.body = data
+            }
+            ctx.body = new SucessModel("修改成功")
+
+        }
     } catch (error) {
         ctx.body = new ErrorModel('代码异常')
     }

@@ -14,8 +14,11 @@ const { SucessModel, ErrorModel } = require('../model/index.js')
 const requiredItem = (ctx, data) => {
     let ctxBody = '', flag = true, body = ctx.request && ctx.request.body || {};
     try {
+        if (!ctx.request) {
+            throw Error()
+        }
+
         Object.keys(data).forEach(item => {
-            // console.log(item, data[item]);
             if (!body[item]) {
                 flag = false
                 ctxBody = data[item] || item + "字段为必传项"
@@ -23,6 +26,7 @@ const requiredItem = (ctx, data) => {
             }
         })
     } catch (error) {
+        flag = false
         ctx.body = new ErrorModel(ctxBody)
     }
     return flag
