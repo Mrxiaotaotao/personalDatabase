@@ -2,6 +2,10 @@
  * 查询数据的sql集合
  */
 
+/**
+ *  查询条数处理 时间的区间查询处理 各个常用时间段查询处理
+ */
+
 const MySql = require('./mysql')
 
 /**
@@ -13,6 +17,7 @@ const MySql = require('./mysql')
  */
 const PsqlList = async (table, orderKey, orderValue = 'ASC') => {
     let sql = orderSqlName(`SELECT * FROM ${table} `, orderKey, orderValue)
+    sql = sql + await limitFn()
     return await MySql(sql)
 }
 
@@ -27,6 +32,7 @@ const PsqlList = async (table, orderKey, orderValue = 'ASC') => {
  */
 const PsqlListSingle = async (table, key, value, orderKey, orderValue = 'ASC') => {
     let sql = await orderSqlName(`SELECT * FROM ${table} WHERE ${key} = '${value}'`, orderKey, orderValue)
+    sql = sql + await limitFn()
     return await MySql(sql)
 }
 /**
@@ -36,13 +42,14 @@ const PsqlListSingle = async (table, key, value, orderKey, orderValue = 'ASC') =
  * @param {*} orderKey  Sort by that field、 Sort switch
  * @param {*} orderValue ASC 正序 DESC 倒序
  */
-const PsqlListMultiple = async (table, data, orderKey, orderValue = 'ASC') => {
+const PsqlListMultiple = async (table, data, orderKey, orderValue = 'ASC', startNum, num) => {
     let keyStr = ''
     Object.keys(data).forEach(function (key) {
         keyStr += ` ${key} = '${data[key]}' and`
     });
     keyStr = keyStr.slice(0, keyStr.length - 3)
     let sql = await orderSqlName(`SELECT * FROM ${table} WHERE ${keyStr}`, orderKey, orderValue)
+    sql = sql + await limitFn(startNum, num)
     return await MySql(sql)
 }
 
@@ -76,6 +83,23 @@ const orderSqlName = (sql, orderKey, orderValue = 'ASC') => {
     } else {
         return sql
     }
+}
+
+/**
+ * 截取语句
+ * @param {*} startNum  Offset | Start with a question | Types of String
+ * @param {*} num Number of query results | Types of String
+ * @returns 
+ */
+
+const limitFn = async (startNum = '0', num = '10') => {
+    console.log(typeof startNum, typeof num);
+    if (typeof startNum != 'string' || typeof num != 'string') {
+        return ''
+    }
+    if (startNum && num) {
+        return ` LIMIT ${startNum},${num}`
+    } else { return '' }
 }
 
 module.exports = {
