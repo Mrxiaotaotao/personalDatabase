@@ -1,6 +1,6 @@
 const { requiredItem } = require('./index')
 const { SucessModel, ErrorModel } = require('../model/index.js')
-const { PsqlListMultiple } = require('../api/sqlPublic')
+const { PsqlQuery } = require('../api/sqlPublic')
 const SqlTableBlogTable = 'blogTable'
 
 // 查询全量博客列表数据 查询条件处理
@@ -16,65 +16,108 @@ const blog_query = async (ctx) => {
     // 个人热门文章 查看个数 5 
 
     // queryType time 最近文章
-    let { queryType, userId } = ctx.request.body
-    if (queryType == 'time') {
-        let { startDate, endDate } = ctx.request.body
-        let querData = { userId }
-        if (startDate && endDate) {
-            querData.startDate = startDate
-            querData.endDate = endDate
-        }
-        // 最新文章
-        let newData = await PsqlListMultiple(SqlTableBlogTable, querData, 'firstDate', 'DESC')
-        let list = [], historyDate = {};
-        for (let i = 0; i < newData.length; i++) {
-            list.push(await timeDate(newData[i].firstDate))
-        }
-
-        list.forEach(item => {
-            if (!historyDate.hasOwnProperty(item.year)) {
-                historyDate[item.year] = []
+    // queryType popular 个人热门文章
+    try {
+        let { queryType, userId } = ctx.request.body
+        if (queryType == 'time') {
+            // 最近文章
+            let querData = { userId }
+            // 最新文章
+            let newData = await PsqlQuery(SqlTableBlogTable, querData, { firstDate: 'DESC' })
+            let list = [], historyDate = {};
+            for (let i = 0; i < newData.length; i++) {
+                list.push(await timeDate(newData[i].firstDate))
             }
-            historyDate[item.year].push(item.month)
-        })
-        ctx.body = new SucessModel({
-            data: await PsqlListMultiple(SqlTableBlogTable, { userId: '1111' }, 'firstDate', 'DESC', '0', '3'),
-            historyDate
-        })
-    } else {
 
+            list.forEach(item => {
+                if (!historyDate.hasOwnProperty(item.year)) {
+                    historyDate[item.year] = []
+                }
+                historyDate[item.year].push(item.month)
+            })
+            ctx.body = new SucessModel({
+                data: await PsqlQuery(SqlTableBlogTable, { userId }, { 'firstDate': 'DESC' }, '0,3', { title: '' }),
+                historyDate
+            })
+        } else if (queryType == 'popular') {
+            // 个人热门文章
+            let data = await PsqlQuery(SqlTableBlogTable, { userId }, { 'seeNu': 'DESC' }, '0,5', { title: '' })
+            if (data.code) {
+                return ctx.body = data
+            }
+            ctx.body = new SucessModel(data)
 
+        } else if (queryType == 'system') {
+            // 管理员查询
+            let { sortType = "firstDate" } = ctx.request.body
+            // 根据什么条件进行查询
+            let sortData = {}
+            sortData[sortType] = "DESC"
+            let data = await PsqlQuery(SqlTableBlogTable, false, sortData, false)
+            if (data.code) {
+                return ctx.body = data
+            }
+            ctx.body = new SucessModel(data)
+        } else {
+            // 个人博客内容查询
+            // 分页 时间段 排序类型 seeNum/firstDate
+            let { startDate, endDate, sortType = "firstDate", page = 1, pageSize = 10 } = ctx.request.body
+            let querData = { userId }, sortData = {}
+            if (startDate && endDate) {
+                querData.SqlBetween = ['firstDate', startDate, endDate]
+            }
+            if (sortType == 'seeNum' || sortType == 'firstDate') {
+                sortData[sortType] = "DESC"
+            } else {
+                sortData.firstDate = "DESC"
+            }
+            let data = await PsqlQuery(SqlTableBlogTable, querData, sortData, `${page - 1},${pageSize - 1}`)
+            if (data.code) {
+                return ctx.body = data
+            }
+            ctx.body = new SucessModel(data)
+
+        }
+
+    } catch (error) {
+        ctx.body = new ErrorModel('代码异常')
     }
 }
 
-
+// 时间线处理
 const timeDate = async (time, type) => {
     if (time) {
         if (!type) {
             let year = time.getFullYear()
             let month = time.getMonth() + 1
-            console.log(year, month, '9909');
             return {
                 year,
                 month
             }
         }
-
-        // let date = data.split('-')
-        // if (type == 'y') {
-        //     return date[0]
-        // } else if (type = 'm') {
-        //     return date[1]
-        // } else {
-        //     return date
-        // }
     }
 }
 
+// 添加博客数据
+const blog_addBlog = async (ctx) => {
+    ctx.body = new SucessModel("ok")
+}
 
+// 修改博客内容
+const blog_upBlog = async (ctx) => {
+    ctx.body = new SucessModel()
+}
+
+// 查看博客
+const blog_seeNum = (ctx, data) => {
+
+}
 
 // 最新评论 时间 5
 // 分类专栏
 module.exports = {
-    blog_query
+    blog_query,
+    blog_addBlog,
+    blog_upBlog,
+    blog_seeNum
 }

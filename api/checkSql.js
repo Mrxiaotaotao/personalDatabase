@@ -35,6 +35,43 @@ const PsqlListSingle = async (table, key, value, orderKey, orderValue = 'ASC') =
     sql = sql + await limitFn()
     return await MySql(sql)
 }
+
+/**
+ * 全量查询
+ * @param {*} table  表名
+ * @param {*} conditionData 条件 
+ * @param {*} orderData 筛选排序
+ * @param {*} limitNum 范围查询
+ * @param {*} displayData 放回字段
+ * @returns 
+ */
+const PsqlQuery = async (table, conditionData = false, orderData = false, limitNum = false, displayData = '*') => {
+    // 返回显示字段处理
+    if (displayData != '*' && displayData != '') {
+        let keyStr = ''
+        Object.keys(displayData).forEach(function (key) {
+            keyStr += ` ${key} ,`
+        });
+        keyStr = keyStr.slice(0, keyStr.length - 1)
+        displayData = keyStr
+    }
+    let sql = `SELECT ${displayData} FROM ${table}`
+    // 查询条件处理
+    if (conditionData) {
+        sql += await conditionName(conditionData)
+    }
+    // 排序字段处理
+    if (orderData) {
+        sql += await orderName(orderData)
+    }
+    // 查询区域处理、分页处理
+    if (limitNum) {
+        sql += await limitFn(limitNum)
+    }
+    console.log(sql, '9090099');
+    return await MySql(sql)
+}
+
 /**
  * 查询单表多条件
  * @param {*} table  Table Name
@@ -87,19 +124,48 @@ const orderSqlName = (sql, orderKey, orderValue = 'ASC') => {
 
 /**
  * 截取语句
- * @param {*} startNum  Offset | Start with a question | Types of String
- * @param {*} num Number of query results | Types of String
+ * @param {*} str  Offset | Start with a question | Types of String | x,x
  * @returns 
  */
 
-const limitFn = async (startNum = '0', num = '10') => {
-    console.log(typeof startNum, typeof num);
-    if (typeof startNum != 'string' || typeof num != 'string') {
-        return ''
-    }
-    if (startNum && num) {
-        return ` LIMIT ${startNum},${num}`
-    } else { return '' }
+const limitFn = async (str = '0,10') => {
+    return ` LIMIT ${str}`
+}
+
+
+/**
+ * 排序语句过滤
+ * @param {*} orderData type of Object | { Sort field :  ASC 正序 DESC 倒序 (默认DESC)} 
+ * @returns Filtered SQL statement
+ */
+const orderName = (orderData) => {
+    let keyStr = ''
+    Object.keys(orderData).forEach(function (key) {
+        keyStr += ` ${key}  ${orderData[key] || 'DESC'} ,`
+
+    });
+    keyStr = keyStr.slice(0, keyStr.length - 1)
+    return keyStr ? ` order by ${keyStr} ` : ''
+}
+
+/**
+ * 条件语句过滤
+ * @param {*} conditionData type of Object | { Condition field : Condition value } 
+ * @returns Filtered SQL statement
+ */
+const conditionName = (conditionData) => {
+    let keyStr = ''
+    Object.keys(conditionData).forEach(function (key) {
+
+        // SqlBetween
+        if (key == 'SqlBetween') {
+            keyStr += ` ${conditionData[key][0]} BETWEEN '${conditionData[key][1]}' and '${conditionData[key][2]}' and`
+        } else {
+            keyStr += ` ${key} = '${conditionData[key]}' and`
+        }
+    });
+    keyStr = keyStr.slice(0, keyStr.length - 3)
+    return keyStr ? ` WHERE ${keyStr} ` : ''
 }
 
 module.exports = {
@@ -107,4 +173,5 @@ module.exports = {
     PsqlLists,
     PsqlListSingle,
     PsqlListMultiple,
+    PsqlQuery
 }

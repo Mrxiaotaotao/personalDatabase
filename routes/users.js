@@ -7,8 +7,7 @@ const {
   users_register,
   users_changePassword,
   users_upDateRegister,
-  users_userInfo,
-  aaaaaa
+  users_userInfo
 } = require('../controller/users')
 
 // 登录接口
@@ -62,12 +61,5 @@ router.post('/upDateRegister', async (ctx) => {
 router.post('/userInfo', async (ctx) => {
   await users_userInfo(ctx)
 })
-
-// 测试接口
-router.post('/bar', async function (ctx) {
-  ctx.body = await aaaaaa(ctx)
-})
-
-
 
 module.exports = router

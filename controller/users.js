@@ -18,34 +18,6 @@ const { PsqlAdd, PsqlListSingle, PsqlListMultiple, PsqlModifyAsingle } = require
 const { SucessModel, ErrorModel } = require('../model/index.js')
 const SqlTableUser = 'users', SqlTableUserInfo = 'userInfo'
 
-
-// 测试多层数据
-const aaaaaa = async (ctx, box) => {
-    // let list = await ctx.util.mysql('SELECT * FROM users')
-    // // console.log(list);
-    // for (let i = 0; i < list.length; i++) {
-
-    //     list[i].listTP = await ctx.util.mysql(`select * from userInfo where userId = ${list[i].id}`)
-    // }
-    // return list
-    let name = ''
-    // return PsqlAdd(userInfo, { userId: '2', text: '测试啦' })
-    return PsqlListSingle('users', 'userId', '1610875250805')
-    // return new Promise((resolve, reject) => {
-    //     PsqlAdd(userInfo, { userId: '2', userImg: '测试啦' }).then(res => {
-    //         resolve({
-    //             name: res
-    //         })
-    //     }).catch(err => {
-    //         resolve({
-    //             name: err
-    //         })
-    //     })
-    // })
-
-}
-// ************************——————————************************
-
 // 登录接口
 const users_login = async (ctx) => {
     try {
@@ -272,7 +244,6 @@ const users_register_check = async (username, password, repassword, nickname) =>
 }
 
 module.exports = {
-    aaaaaa,
     users_login,
     users_logout,
     users_register,

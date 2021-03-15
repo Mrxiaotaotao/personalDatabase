@@ -32,6 +32,7 @@ const requiredItem = (ctx, data) => {
     return flag
 }
 
+// 用户统计处理
 const userNum = (ctx, data) => {
     try {
 
@@ -39,6 +40,9 @@ const userNum = (ctx, data) => {
 
     }
 }
+
+// 积分处理
+
 
 
 module.exports = { requiredItem, userNum }
