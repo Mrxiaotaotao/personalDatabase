@@ -14,7 +14,7 @@
 // 用户账号表
 const jsonWebToken = require('jsonwebtoken')
 const { requiredItem } = require('./index')
-const { PsqlAdd, PsqlListSingle, PsqlListMultiple, PsqlModifyAsingle } = require('../api/sqlPublic')
+const { PsqlAdd, PsqlListSingle, PsqlListMultiple, PsqlModifyAsingle, PsqlQuery } = require('../api/sqlPublic')
 const { SucessModel, ErrorModel } = require('../model/index.js')
 const SqlTableUser = 'users', SqlTableUserInfo = 'userInfo'
 
@@ -27,7 +27,8 @@ const users_login = async (ctx) => {
             let name = body.userName
             let password = body.userPassWord
             // sql查询
-            const [res] = await PsqlListMultiple(SqlTableUser, { userId: name, userPassWord: password })
+            // const [res] = await PsqlListMultiple(SqlTableUser, { userId: name, userPassWord: password })
+            const [res] = await PsqlQuery(SqlTableUser, { userId: name, userPassWord: password })
             if (res) {
                 const { userName, userId, nickname, gender, premission } = res
                 let expiresIn = premission == 0 ? (24 * 7) + 'h' : '6h'
@@ -75,8 +76,8 @@ const users_register = async (ctx) => {
                 if (checkName) {
                     return ctx.body = new ErrorModel(checkName)
                 }
-                const [res2] = await PsqlListSingle(SqlTableUser, 'email', email);//该邮箱是否注册过 
-                const [res3] = await PsqlListSingle(SqlTableUser, 'phone', phone)//该号码是否注册过
+                const [res2] = await PsqlQuery(SqlTableUser, { email });//该邮箱是否注册过 
+                const [res3] = await PsqlQuery(SqlTableUser, { phone })//该号码是否注册过
                 if (res2) {
                     return ctx.body = new ErrorModel('该邮箱已被注册！')
                 }

@@ -1,6 +1,6 @@
 const { requiredItem } = require('./index')
 const { SucessModel, ErrorModel } = require('../model/index.js')
-const { PsqlList, PsqlListSingle, PsqlListMultiple, PsqlAdd, PsqlDelSingle, PsqlModifyAsingle } = require('../api/sqlPublic')
+const { PsqlList, PsqlListSingle, PsqlListMultiple, PsqlAdd, PsqlDelSingle, PsqlModifyAsingle, PsqlQuery } = require('../api/sqlPublic')
 const SqlTableHomeTable = 'homeTable',
     SqlTableHomeList = 'homeList',
     SqlTableBlogTable = 'blogTable',
@@ -10,11 +10,15 @@ let sortsNum = 100;
 // 首页列表查询
 const home_query = async (ctx) => {
     try {
-        let list = await PsqlList(SqlTableHomeTable, 'orders')
+        // let list = await PsqlList(SqlTableHomeTable, 'orders')
+        let list = await PsqlQuery(SqlTableHomeTable, false, { orders: 'DESC' })
+
         for (let i = 0; i < list.length; i++) {
-            let childList = await PsqlListSingle(SqlTableHomeList, 'Pid', list[i].id)
+            // let childList = await PsqlListSingle(SqlTableHomeList, 'Pid', list[i].id)
+            let childList = await PsqlQuery(SqlTableHomeList, { 'Pid': list[i].id })
             for (let j = 0; j < childList.length; j++) {
-                let blogData = await PsqlListSingle(SqlTableBlogTable, 'id', childList[j].blogId)
+                // let blogData = await PsqlListSingle(SqlTableBlogTable, 'id', childList[j].blogId)
+                let blogData = await PsqlQuery(SqlTableBlogTable, { 'id': childList[j].blogId })
                 childList[j] = {
                     ...blogData[0],
                     img: childList[j].img
@@ -31,7 +35,8 @@ const home_query = async (ctx) => {
 // 首页导航查询
 const home_navQuery = async (ctx) => {
     try {
-        let data = await PsqlListMultiple(SqlTableNavTable, { navType: '1', navFlag: '1' }, 'sorts')
+        // let data = await PsqlListMultiple(SqlTableNavTable, { navType: '1', navFlag: '1' }, 'sorts')
+        let data = await PsqlQuery(SqlTableNavTable, { navType: '1', navFlag: '1' }, { sorts: '' })
         if (!data.protocol41) {
             return ctx.body = data
         }
@@ -45,7 +50,8 @@ const home_navQuery = async (ctx) => {
 // 首页头部导航查询
 const home_navHome = async (ctx) => {
     try {
-        let data = await PsqlListMultiple(SqlTableNavHome, { flag: '1' }, 'sorts')
+        // let data = await PsqlListMultiple(SqlTableNavHome, { flag: '1' }, 'sorts')
+        let data = await PsqlQuery(SqlTableNavHome, { flag: '1' }, { sorts: "" })
         let obj = {
             '1': [],
             '2': [],
@@ -53,7 +59,8 @@ const home_navHome = async (ctx) => {
         }
         for (let i = 0; i < data.length; i++) {
             if (data[i].navType == 0) {
-                let navItem = await PsqlListMultiple(SqlTableNavTable, { id: data[i].navId, navType: '2', navFlag: '1' })
+                // let navItem = await PsqlListMultiple(SqlTableNavTable, { id: data[i].navId, navType: '2', navFlag: '1' })
+                let navItem = await PsqlQuery(SqlTableNavTable, { id: data[i].navId, navType: '2', navFlag: '1' })
                 obj['0'].push(navItem[0])
             } else {
                 obj[data[i].navType].push(data[i])
@@ -72,7 +79,8 @@ const home_addItem = async (ctx) => {
 
         if (requiredItem(ctx, { title, icon, type, TypeSize, orders })) {
 
-            let titleFlag = await PsqlListMultiple(SqlTableHomeTable, { title })
+            // let titleFlag = await PsqlListMultiple(SqlTableHomeTable, { title })
+            let titleFlag = await PsqlQuery(SqlTableHomeTable, { title })
             if (titleFlag[0]) {
                 return ctx.body = new ErrorModel("请不要重复添加")
             }
