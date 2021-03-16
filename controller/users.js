@@ -14,7 +14,7 @@
 // 用户账号表
 const jsonWebToken = require('jsonwebtoken')
 const { requiredItem } = require('./index')
-const { PsqlAdd, PsqlListSingle, PsqlListMultiple, PsqlModifyAsingle, PsqlQuery } = require('../api/sqlPublic')
+const { PsqlAdd, PsqlListMultiple, PsqlModifyAsingle, PsqlQuery } = require('../api/sqlPublic')
 const { SucessModel, ErrorModel } = require('../model/index.js')
 const SqlTableUser = 'users', SqlTableUserInfo = 'userInfo'
 
@@ -142,7 +142,7 @@ const users_changePassword = async (ctx) => {
             // 超级管理权限可以直接根据用户名改或其他唯一值更改密码
             let keyNameList = ['id', 'userId', 'email', 'phone']
             if (keyNameList.indexOf(sqlKey) == -1) sqlKey = 'userId';
-            let [userFlag] = await PsqlListSingle(SqlTableUser, sqlKey, username)
+            let [userFlag] = await PsqlQuery(SqlTableUser, { sqlKey: username })
             if (userFlag) {
                 let data = {}
                 data[sqlKey] = username
@@ -233,12 +233,13 @@ const users_register_check = async (username, password, repassword, nickname) =>
     }
 
     //用户名是否注册过
-    const [user] = await PsqlListSingle(SqlTableUser, 'userId', username);
+    const [user] = await PsqlQuery(SqlTableUser, { 'userId': username });
     if (user) {
         return '该用户名或账号已注册！'
     }
 
-    const [nick] = await PsqlListSingle(SqlTableUser, 'nickname', nickname)
+    // 该昵称是否存在
+    const [nick] = await PsqlQuery(SqlTableUser, { 'nickname': nickname })
     if (nick) {
         return '该昵称已存在！'
     }

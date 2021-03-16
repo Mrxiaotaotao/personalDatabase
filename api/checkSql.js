@@ -9,40 +9,12 @@
 const MySql = require('./mysql')
 
 /**
- * 单列表查询 全量 无条件 有排序
- * @param {*} table Table Name 
- * @param {*} orderKey Sort by that field、 Sort switch
- * @param {*} orderValue ASC 正序 DESC 倒序
- * @returns Array
- */
-const PsqlList = async (table, orderKey, orderValue = 'ASC') => {
-    let sql = orderSqlName(`SELECT * FROM ${table} `, orderKey, orderValue)
-    sql = sql + await limitFn()
-    return await MySql(sql)
-}
-
-/**
- * 列表/单数据查询 全量 单条件 有排序(查数据详情时可不用管)
- * @param {*} table Table Name
- * @param {*} key Condition key value
- * @param {*} value  Condition value
- * @param {*} orderKey Sort by that field、 Sort switch
- * @param {*} orderValue ASC 正序 DESC 倒序
- * @returns Array/Object
- */
-const PsqlListSingle = async (table, key, value, orderKey, orderValue = 'ASC') => {
-    let sql = await orderSqlName(`SELECT * FROM ${table} WHERE ${key} = '${value}'`, orderKey, orderValue)
-    sql = sql + await limitFn()
-    return await MySql(sql)
-}
-
-/**
  * 全量查询
- * @param {*} table  表名
- * @param {*} conditionData 条件 
- * @param {*} orderData 筛选排序
- * @param {*} limitNum 范围查询
- * @param {*} displayData 放回字段
+ * @param {*} table  表名 xxx
+ * @param {*} conditionData 条件 {id:"xx"} | 区间段查询  例 SqlBetween = ['筛选字段名', 开始, 结束] | 第一个字段为 SqlOR 表示此查询为 包含的关系(或) or 关联 | 默认为 end 并且关系
+ * @param {*} orderData 筛选排序  { Sort field :  ASC 正序 DESC 倒序 (默认DESC)} 
+ * @param {*} limitNum 范围查询 '0,1'
+ * @param {*} displayData 放回字段 {id:"xx"}
  * @returns 
  */
 const PsqlQuery = async (table, conditionData = false, orderData = false, limitNum = false, displayData = '*') => {
@@ -68,7 +40,7 @@ const PsqlQuery = async (table, conditionData = false, orderData = false, limitN
     if (limitNum) {
         sql += await limitFn(limitNum)
     }
-    console.log(sql, '9090099');
+    console.log(sql, 'sql语句展示');
     return await MySql(sql)
 }
 
@@ -86,25 +58,8 @@ const PsqlListMultiple = async (table, data, orderKey, orderValue = 'ASC', start
     });
     keyStr = keyStr.slice(0, keyStr.length - 3)
     let sql = await orderSqlName(`SELECT * FROM ${table} WHERE ${keyStr}`, orderKey, orderValue)
-    sql = sql + await limitFn(startNum, num)
+    // sql = sql + await limitFn(startNum, num)
     return await MySql(sql)
-}
-
-/**
- * 二层列表查询 全量 无条件 无排序
- * @param {*} table1  Parent table name
- * @param {*} table2  Child table name
- * @param {*} subListName Field name associated with parent and child
- * @param {*} idName The identifier associated with the parent id and the subset
- * @param {*} userIdName The identifier associated with the subset id and the parent
- * @returns Array
- */
-const PsqlLists = async (table1, table2, subListName = 'subList', idName = 'id', userIdName = 'userId') => {
-    let list = await PsqlList(table1)
-    list.forEach(async item => {
-        item[subListName] = await PsqlListSingle(table2, userIdName, item[idName])
-    });
-    return list
 }
 
 /**
@@ -129,7 +84,10 @@ const orderSqlName = (sql, orderKey, orderValue = 'ASC') => {
  */
 
 const limitFn = async (str = '0,10') => {
-    return ` LIMIT ${str}`
+    let strL = str.split(',')
+    let startNum = Number(strL[0])
+    let endNum = Number(strL[1])
+    return ` LIMIT ${(startNum - 1) * endNum},${startNum * endNum}`
 }
 
 
@@ -155,23 +113,24 @@ const orderName = (orderData) => {
  */
 const conditionName = (conditionData) => {
     let keyStr = ''
-    Object.keys(conditionData).forEach(function (key) {
-
-        // SqlBetween
-        if (key == 'SqlBetween') {
-            keyStr += ` ${conditionData[key][0]} BETWEEN '${conditionData[key][1]}' and '${conditionData[key][2]}' and`
+    let connectionFlag = 'and'
+    Object.keys(conditionData).forEach(function (key, index) {
+        if (index == 0 && key == 'SqlOR') {
+            connectionFlag = 'or'
         } else {
-            keyStr += ` ${key} = '${conditionData[key]}' and`
+            if (key == 'SqlBetween') {
+                keyStr += ` ${conditionData[key][0]} BETWEEN '${conditionData[key][1]}' and '${conditionData[key][2]}' and`
+            } else {
+                keyStr += ` ${key} = '${conditionData[key]}' ${connectionFlag}`
+            }
         }
+
     });
     keyStr = keyStr.slice(0, keyStr.length - 3)
     return keyStr ? ` WHERE ${keyStr} ` : ''
 }
 
 module.exports = {
-    PsqlList,
-    PsqlLists,
-    PsqlListSingle,
     PsqlListMultiple,
     PsqlQuery
 }

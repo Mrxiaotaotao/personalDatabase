@@ -1,6 +1,6 @@
-const { requiredItem } = require('./index')
+const { requiredItem, ruleID, ruleTime } = require('./index')
 const { SucessModel, ErrorModel } = require('../model/index.js')
-const { PsqlQuery } = require('../api/sqlPublic')
+const { PsqlQuery, PsqlModifyAsingle, PsqlAdd } = require('../api/sqlPublic')
 const SqlTableBlogTable = 'blogTable'
 
 // 查询全量博客列表数据 查询条件处理
@@ -71,7 +71,7 @@ const blog_query = async (ctx) => {
             } else {
                 sortData.firstDate = "DESC"
             }
-            let data = await PsqlQuery(SqlTableBlogTable, querData, sortData, `${page - 1},${pageSize - 1}`)
+            let data = await PsqlQuery(SqlTableBlogTable, querData, sortData, `${page},${pageSize}`)
             if (data.code) {
                 return ctx.body = data
             }
@@ -100,17 +100,76 @@ const timeDate = async (time, type) => {
 
 // 添加博客数据
 const blog_addBlog = async (ctx) => {
-    ctx.body = new SucessModel("ok")
+    try {
+        let { userId, blogClass, blogLabel, blogType, title, content } = ctx.request.body
+        if (requiredItem(ctx, { userId, blogClass, blogLabel, blogType, title, content })) {
+            // let [titleFlag] = await PsqlQuery(SqlTableBlogTable, { title })
+            // if (titleFlag) {
+            //     return ctx.body = new ErrorModel('请不要重复添加')
+            // }
+            let date = ruleTime(), id = ruleID();
+            let addData = {
+                id,
+                userId,
+                blogClass,
+                blogLabel,
+                blogType,
+                title,
+                content,
+                firstDate: date,
+                lastDate: date,
+                top: 0,
+                articleLink: `/${userId}/article/${id}`
+            }
+            let data = await PsqlAdd(SqlTableBlogTable, addData)
+            if (data.protocol41) {
+                ctx.body = new SucessModel('添加成功')
+            } else {
+                ctx.body = new ErrorModel(data)
+            }
+        }
+
+    } catch (error) {
+        ctx.body = new ErrorModel(error)
+    }
 }
 
 // 修改博客内容
 const blog_upBlog = async (ctx) => {
     ctx.body = new SucessModel()
+    try {
+        let { blogId, userId, blogClass, blogLabel, blogType, title, content } = ctx.request.body
+        if (requiredItem(ctx, { blogId, userId, blogClass, blogLabel, blogType, title, content })) {
+            const flag = await PsqlQuery(SqlTableBlogTable, { id: blogId, userId })
+            if (flag) {
+                await PsqlModifyAsingle(SqlTableBlogTable, { blogClass, blogLabel, blogType, title, content, lastDate: ruleTime() }, { id: blogId, userId })
+                ctx.body = new SucessModel('修改成功')
+            } else {
+                ctx.body = new ErrorModel('未匹配到要修改的数据')
+            }
+        }
+    } catch (error) {
+        ctx.body = new ErrorModel(error)
+    }
 }
 
 // 查看博客
-const blog_seeNum = (ctx, data) => {
-
+const blog_seeNum = async (ctx) => {
+    try {
+        let { blogId } = ctx.request.body
+        if (requiredItem(ctx, { blogId })) {
+            let blogData = await PsqlQuery(SqlTableBlogTable, { id: blogId }, false, false, { seeNum: '' })
+            if (blogData && blogData.length > 0) {
+                let num = blogData[0].seeNum
+                await PsqlModifyAsingle(SqlTableBlogTable, { seeNum: num + 1 }, { id: blogId })
+                ctx.body = new SucessModel('查看记录添加成功')
+            } else {
+                ctx.body = new ErrorModel("未查询到此博客")
+            }
+        }
+    } catch (error) {
+        ctx.body = new ErrorModel(error)
+    }
 }
 
 // 最新评论 时间 5
