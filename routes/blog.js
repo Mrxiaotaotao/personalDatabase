@@ -29,4 +29,9 @@ router.post('/seeNum', async (ctx) => {
     await blog_seeNum(ctx)
 })
 
+// 点赞
+router.post('/like', async (ctx) => {
+
+})
+
 module.exports = router

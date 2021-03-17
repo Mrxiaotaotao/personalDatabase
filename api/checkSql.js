@@ -12,7 +12,7 @@ const MySql = require('./mysql')
  * 全量查询
  * @param {*} table  表名 xxx
  * @param {*} conditionData 条件 {id:"xx"} | 区间段查询  例 SqlBetween = ['筛选字段名', 开始, 结束] | 第一个字段为 SqlOR 表示此查询为 包含的关系(或) or 关联 | 默认为 end 并且关系
- * @param {*} orderData 筛选排序  { Sort field :  ASC 正序 DESC 倒序 (默认DESC)} 
+ * @param {*} orderData 筛选排序  { Sort field :  ASC 正序 DESC 倒序 (默认DESC)}  | 模糊查询字段 SqlLike = [模糊查询字段名, 字段值]
  * @param {*} limitNum 范围查询 '0,1'
  * @param {*} displayData 放回字段 {id:"xx"}
  * @returns 
@@ -110,6 +110,7 @@ const orderName = (orderData) => {
  * 条件语句过滤
  * @param {*} conditionData type of Object | { Condition field : Condition value } 
  * @returns Filtered SQL statement
+ * 暂时不支持模糊查询具体个数
  */
 const conditionName = (conditionData) => {
     let keyStr = ''
@@ -119,9 +120,11 @@ const conditionName = (conditionData) => {
             connectionFlag = 'or'
         } else {
             if (key == 'SqlBetween') {
-                keyStr += ` ${conditionData[key][0]} BETWEEN '${conditionData[key][1]}' and '${conditionData[key][2]}' and`
+                keyStr += ` ${conditionData[key][0]} BETWEEN '${conditionData[key][1]}' and '${conditionData[key][2]}'  ${connectionFlag}`
+            } else if (key == 'SqlLike') {
+                keyStr += ` ${conditionData[key][0]} like '%${conditionData[key][1]}%'  ${connectionFlag}`
             } else {
-                keyStr += ` ${key} = '${conditionData[key]}' ${connectionFlag}`
+                keyStr += ` ${key} = '${conditionData[key]}'  ${connectionFlag}`
             }
         }
 

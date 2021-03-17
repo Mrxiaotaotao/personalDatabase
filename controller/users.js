@@ -44,7 +44,7 @@ const users_login = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error)
+        ctx.body = new ErrorModel(error, '接口异常')
     }
 }
 
@@ -55,7 +55,7 @@ const users_logout = (ctx) => {
         ctx.cookies.set('Premission', '', { signed: false, maxAge: 0 })
         ctx.body = new SucessModel('成功退出')
     } catch (error) {
-        ctx.body = new ErrorModel(`${error}`)
+        ctx.body = new ErrorModel(error, '接口异常')
     }
 }
 
@@ -129,101 +129,114 @@ const users_register = async (ctx) => {
 
         ctx.body = new SucessModel('注册成功！')
     } catch (error) {
-        ctx.body = new ErrorModel('error')
+        ctx.body = new ErrorModel(error, '接口异常')
     }
 }
 
 // 修改密码
 const users_changePassword = async (ctx) => {
-    const { administrators, username, password, oldPassword, sqlKey = 'userId' } = ctx.request.body;
-    console.log('Liuangt');
-    if (administrators == 2) {
-        if (requiredItem(ctx, { username, password })) {
-            // 超级管理权限可以直接根据用户名改或其他唯一值更改密码
-            let keyNameList = ['id', 'userId', 'email', 'phone']
-            if (keyNameList.indexOf(sqlKey) == -1) sqlKey = 'userId';
-            let [userFlag] = await PsqlQuery(SqlTableUser, { sqlKey: username })
-            if (userFlag) {
-                let data = {}
-                data[sqlKey] = username
-                let upPass = await PsqlModifyAsingle(SqlTableUser, { 'userPassWord': password }, data)
-                if (upPass.protocol41) {
-                    ctx.body = new SucessModel('密码修改成功')
+    try {
+        const { administrators, username, password, oldPassword, sqlKey = 'userId' } = ctx.request.body;
+        console.log('Liuangt');
+        if (administrators == 2) {
+            if (requiredItem(ctx, { username, password })) {
+                // 超级管理权限可以直接根据用户名改或其他唯一值更改密码
+                let keyNameList = ['id', 'userId', 'email', 'phone']
+                if (keyNameList.indexOf(sqlKey) == -1) sqlKey = 'userId';
+                let [userFlag] = await PsqlQuery(SqlTableUser, { sqlKey: username })
+                if (userFlag) {
+                    let data = {}
+                    data[sqlKey] = username
+                    let upPass = await PsqlModifyAsingle(SqlTableUser, { 'userPassWord': password }, data)
+                    if (upPass.protocol41) {
+                        ctx.body = new SucessModel('密码修改成功')
+                    } else {
+                        return ctx.body = upPass
+                    }
                 } else {
-                    return ctx.body = upPass
+                    ctx.body = new ErrorModel("用户名或密码不正确")
                 }
-            } else {
-                ctx.body = new ErrorModel("用户名或密码不正确")
+            }
+        } else {
+            // 用户及管理员处理方式
+            if (requiredItem(ctx, { username, password, oldPassword })) {
+                let [userFlag] = await PsqlListMultiple(SqlTableUser, { 'userId': username, userPassWord: oldPassword })
+                if (userFlag) {
+                    let upPass = await PsqlModifyAsingle(SqlTableUser, { 'userPassWord': password }, { 'userId': username, userPassWord: oldPassword })
+                    if (upPass.protocol41) {
+                        ctx.body = new SucessModel('密码修改成功')
+                    } else {
+                        return ctx.body = upPass
+                    }
+                } else {
+                    ctx.body = new ErrorModel("未查询到此用户或密码不正确")
+                }
             }
         }
-    } else {
-        // 用户及管理员处理方式
-        if (requiredItem(ctx, { username, password, oldPassword })) {
-            let [userFlag] = await PsqlListMultiple(SqlTableUser, { 'userId': username, userPassWord: oldPassword })
-            if (userFlag) {
-                let upPass = await PsqlModifyAsingle(SqlTableUser, { 'userPassWord': password }, { 'userId': username, userPassWord: oldPassword })
-                if (upPass.protocol41) {
-                    ctx.body = new SucessModel('密码修改成功')
-                } else {
-                    return ctx.body = upPass
-                }
-            } else {
-                ctx.body = new ErrorModel("未查询到此用户或密码不正确")
-            }
-        }
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
     }
 }
 
 // 修改用户单个信息
 const users_upDateRegister = async (ctx) => {
-    if (requiredItem(ctx, ctx.request.body)) {
-        ctx.body = new SucessModel('修改成功！')
-    }
-    // const { id, key, value } = ctx.request.body;
-    // if (!id || !key || !value) {
-    //   return ctx.body = new ErrorModel('必填项校验不通过')
-    // }
+    try {
+        if (requiredItem(ctx, ctx.request.body)) {
+            ctx.body = new SucessModel('修改成功！')
+        }
+        // const { id, key, value } = ctx.request.body;
+        // if (!id || !key || !value) {
+        //   return ctx.body = new ErrorModel('必填项校验不通过')
+        // }
 
-    // ctx.body = new SucessModel('修改成功！')
+        // ctx.body = new SucessModel('修改成功！')
+
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
+    }
 }
 
 // 个人数据添加及修改
 const users_userInfo = async (ctx, deflag = false) => {
-    if (deflag) {
-        // 添加用户及管理员对应的详情表添加
-        // nodejs生成UID（唯一标识符）——node-uuid模块
-        const data = await PsqlAdd(SqlTableUserInfo, { userId: deflag, userImg: '/uploads/avater/user.jpeg' })
-        if (!data.protocol41) {
-            return ctx.body = data
-        }
-    } else {
-        // 默认为修改个人数据
-        const { infoType, userId } = ctx.request.body
-        let data = {}
-        if (infoType == '1') {
-            const { userName, actualName, gender, info, areas, dateBirths, developmentTime } = ctx.request.body
-            const userChangeData = await PsqlModifyAsingle(SqlTableUser, { userName, info }, { id: userId })
-            if (!userChangeData.protocol41) {
-                return ctx.body = userChangeData
+    try {
+        if (deflag) {
+            // 添加用户及管理员对应的详情表添加
+            // nodejs生成UID（唯一标识符）——node-uuid模块
+            const data = await PsqlAdd(SqlTableUserInfo, { userId: deflag, userImg: '/uploads/avater/user.jpeg' })
+            if (!data.protocol41) {
+                return ctx.body = data
             }
-            data = { actualName, gender, areas, dateBirths, developmentTime }
-        } else if (infoType == '2') {
-            const { educationalInformation, schoolName, admissionTime, education } = ctx.request.body
-            data = { educationalInformation, schoolName, admissionTime, education }
-        } else if (infoType == '3') {
-            const { workInfo, companyName, jobTitle, industry } = ctx.request.body
-            data = { workInfo, companyName, jobTitle, industry }
         } else {
-            // 其他处理方式
-        }
+            // 默认为修改个人数据
+            const { infoType, userId } = ctx.request.body
+            let data = {}
+            if (infoType == '1') {
+                const { userName, actualName, gender, info, areas, dateBirths, developmentTime } = ctx.request.body
+                const userChangeData = await PsqlModifyAsingle(SqlTableUser, { userName, info }, { id: userId })
+                if (!userChangeData.protocol41) {
+                    return ctx.body = userChangeData
+                }
+                data = { actualName, gender, areas, dateBirths, developmentTime }
+            } else if (infoType == '2') {
+                const { educationalInformation, schoolName, admissionTime, education } = ctx.request.body
+                data = { educationalInformation, schoolName, admissionTime, education }
+            } else if (infoType == '3') {
+                const { workInfo, companyName, jobTitle, industry } = ctx.request.body
+                data = { workInfo, companyName, jobTitle, industry }
+            } else {
+                // 其他处理方式
+            }
 
-        const changeData = await PsqlModifyAsingle(SqlTableUserInfo, data, { userId })
-        if (!changeData.protocol41) {
-            return ctx.body = changeData
-        }
+            const changeData = await PsqlModifyAsingle(SqlTableUserInfo, data, { userId })
+            if (!changeData.protocol41) {
+                return ctx.body = changeData
+            }
 
+        }
+        return ctx.body = new SucessModel('个人数据修改成功')
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
     }
-    return ctx.body = new SucessModel('个人数据修改成功')
 }
 
 // 注册中校验公共方法

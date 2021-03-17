@@ -80,7 +80,7 @@ const blog_query = async (ctx) => {
         }
 
     } catch (error) {
-        ctx.body = new ErrorModel('代码异常')
+        ctx.body = new ErrorModel(error, '接口异常')
     }
 }
 
@@ -130,7 +130,7 @@ const blog_addBlog = async (ctx) => {
         }
 
     } catch (error) {
-        ctx.body = new ErrorModel(error)
+        ctx.body = new ErrorModel(error, '接口异常')
     }
 }
 
@@ -149,7 +149,7 @@ const blog_upBlog = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error)
+        ctx.body = new ErrorModel(error, '接口异常')
     }
 }
 
@@ -168,7 +168,7 @@ const blog_seeNum = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error)
+        ctx.body = new ErrorModel(error, '接口异常')
     }
 }
 

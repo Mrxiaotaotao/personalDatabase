@@ -134,6 +134,7 @@ create table userInfo (
         userId 用户id
         blogUserId 此博客用户id
         blogId 此博客id
+        
 ---***---
 create table favoritesTable (
 id INT NOT NULL COMMENT '收藏ID',
@@ -143,14 +144,10 @@ id INT NOT NULL COMMENT '收藏ID',
 )
 ---***---
 关注表
+相反是粉丝表
     attentionTable
-        字段
-        id
-        userId 用户id
+        fansId 用户id
         blogUserId 此博主用户id / 账号名
-        attentionId 你所关注的用户id
-        attentionBlogId 你所关注的用户id
-        attentionType 类型 1 关注博主 0 关注博客
 ---***---
 create table attentionTable (
 id INT NOT NULL COMMENT '收藏ID',
@@ -160,13 +157,7 @@ id INT NOT NULL COMMENT '收藏ID',
 	attentionType INT(1) NOT NULL comment '类型 1 关注博主 0 关注博客'
 )
 ---***---
-粉丝表
-    FansTable
-        字段
-        id
-        userId 用户id
-        blogUserId 此博客用户id / 账号名
-        userFansId 你粉丝的用户id
+
 ---***---
 create table fansTable (
 	id INT NOT NULL COMMENT '粉丝ID',
@@ -234,7 +225,7 @@ create table likeTable (
     className 分类名称
     classimage 分类图片 默认有
     classTable 分类总量
-    top false 未置顶 true 置顶 只会有一个置顶
+    top 0 未置顶 1 置顶 只会有一个置顶
 ---***---
 create table classificationTable (
 	id INT NOT NULL COMMENT '分类id',
