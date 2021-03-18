@@ -5,6 +5,7 @@ const {
     related_query,
     related_attention,
     related_unsubscribe,
+    related_queryFanstA,
     related_favorites,
     related_unfavorites,
     related_QueryClass,

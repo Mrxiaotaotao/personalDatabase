@@ -1,7 +1,8 @@
 const { requiredItem } = require('./index')
 const { SucessModel, ErrorModel } = require('../model/index.js')
 const { PsqlAdd, PsqlDelSingle, PsqlQuery } = require('../api/sqlPublic');
-const SqlTableAttentionTable = 'attentionTable';
+const SqlTableAttentionTable = 'attentionTable',
+    SqlTableUserInfo = 'userInfo';
 /**
  * 
  * 关注 粉丝 统计 分组等
@@ -54,52 +55,114 @@ const attentionFN = async (ctx, type) => {
 }
 
 // 粉丝及关注查询
+// fansId
+// blogUserId
 const related_queryFanstA = async (ctx) => {
+    try {
+        let { type } = ctx.request.body
+        console.log(ctx.util.token, '90909');
+        let userId = ctx.util.token.jwt
+        if (requiredItem(ctx, { type })) {
+            let tableData = [
+                SqlTableAttentionTable,
+                SqlTableUserInfo,
+            ]
 
+            if (type == 'fans') {
+                tableData.push('fansId')
+                tableData.push('id')
+            } else {
+                tableData.push('blogUserId')
+                tableData.push('id')
+            }
+            console.log(tableData, '90909')
+            let data = await PsqlQuery(tableData, { fansId: userId }, false, false, {})
+            ctx.body = new SucessModel(data)
+        }
+
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
+    }
 }
 
 // 收藏 
 const related_favorites = async (ctx) => {
+    try {
 
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
+    }
 }
 
 // 取消收藏 
 const related_unfavorites = async (ctx) => {
+    try {
 
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
+    }
 }
 
 // 分类
 const related_QueryClass = async (ctx) => {
+    try {
 
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
+    }
 }
 // 修改分类
 const related_upClass = async (ctx) => {
+    try {
 
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
+    }
 }
 
 // 添加分类
 const related_addClass = async (ctx) => {
+    try {
 
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
+    }
 }
 
 // 评论查询
 const related_comment = async (ctx) => {
+    try {
 
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
+    }
 }
 
 // 添加评论
 const related_addComment = async (ctx) => {
+    try {
 
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
+    }
 }
 
 // 修改评论
 const related_upComment = async (ctx) => {
+    try {
 
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
+    }
 }
 
 // 删除评论
 const related_delComment = async (ctx) => {
+    try {
 
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '接口异常')
+    }
 }
 
 

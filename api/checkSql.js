@@ -27,7 +27,18 @@ const PsqlQuery = async (table, conditionData = false, orderData = false, limitN
         keyStr = keyStr.slice(0, keyStr.length - 1)
         displayData = keyStr
     }
-    let sql = `SELECT ${displayData} FROM ${table}`
+    let innerJoin = ''
+    if (table) {
+        console.log(typeof table, '测试类型')
+        if (typeof table == 'object' && table.length == 4) {
+            innerJoin = `${table[0]} a  INNER JOIN ${table[1]} b on a.${table[2]} = b.${table[3]}  `
+        } else {
+            innerJoin = table
+        }
+    } else {
+        return false
+    }
+    let sql = `SELECT ${displayData} FROM ${innerJoin}`
     // 查询条件处理
     if (conditionData) {
         sql += await conditionName(conditionData)

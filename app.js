@@ -114,6 +114,7 @@ app.use(async (ctx, next) => {
       ctx.request.header = { 'authorization': "Bearer " + (token || '') }
       //开始时间小于结束时间，代表token还有效
       if (payload.iat < payload.exp) {
+        ctx.util.token = payload
         await next();
       } else {
         ctx.body = payload

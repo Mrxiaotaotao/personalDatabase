@@ -30,10 +30,10 @@ const users_login = async (ctx) => {
             // const [res] = await PsqlListMultiple(SqlTableUser, { userId: name, userPassWord: password })
             const [res] = await PsqlQuery(SqlTableUser, { userId: name, userPassWord: password })
             if (res) {
-                const { userName, userId, nickname, gender, premission } = res
+                const { userName, userId, nickname, gender, premission, id } = res
                 let expiresIn = premission == 0 ? (24 * 7) + 'h' : '6h'
                 console.log(expiresIn);
-                const jwt = jsonWebToken.sign({ password, userId }, 'my_token', { expiresIn })
+                const jwt = jsonWebToken.sign({ password, userId, jwt: id }, 'my_token', { expiresIn })
                 ctx.cookies.set('Authorization', jwt)
                 ctx.set('Authorization', jwt)
                 ctx.cookies.set('Premission', premission)
