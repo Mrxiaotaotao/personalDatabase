@@ -55,7 +55,7 @@ const attentionFN = async (ctx, type) => {
 }
 
 // 粉丝及关注查询
-// fansId
+// fansId date 出生 开发时间
 // blogUserId
 const related_queryFanstA = async (ctx) => {
     try {
@@ -63,20 +63,21 @@ const related_queryFanstA = async (ctx) => {
         console.log(ctx.util.token, '90909');
         let userId = ctx.util.token.jwt
         if (requiredItem(ctx, { type })) {
-            let tableData = [
-                SqlTableAttentionTable,
-                SqlTableUserInfo,
-            ]
+            let tableData = {
+                [SqlTableAttentionTable]: '',
+                [SqlTableUserInfo]: ''
+            }
 
             if (type == 'fans') {
-                tableData.push('fansId')
-                tableData.push('id')
+
+                tableData[SqlTableUserInfo] = `${SqlTableAttentionTable}.fansId = ${SqlTableUserInfo}.userId`
+            } else if (type == 'attention') {
+                tableData[SqlTableUserInfo] = `${SqlTableAttentionTable}.blogUserId = ${SqlTableUserInfo}.userId`
             } else {
-                tableData.push('blogUserId')
-                tableData.push('id')
+                return ctx.body = new ErrorModel("类型错误")
             }
             console.log(tableData, '90909')
-            let data = await PsqlQuery(tableData, { fansId: userId }, false, false, {})
+            let data = await PsqlQuery(tableData, { fansId: userId }, false, false, { userImg: "", userTime: '' })
             ctx.body = new SucessModel(data)
         }
 

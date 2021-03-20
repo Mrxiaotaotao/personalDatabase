@@ -27,25 +27,22 @@ const PsqlQuery = async (table, conditionData = false, orderData = false, limitN
         keyStr = keyStr.slice(0, keyStr.length - 1)
         displayData = keyStr
     }
-    let innerJoin = ''
+    let sql = `SELECT ${displayData} FROM `
+
+    // 链表查询处理 
     if (table) {
-        console.log(typeof table, '测试类型')
-        if (typeof table == 'object' && table.length == 4) {
-            innerJoin = `${table[0]} a  INNER JOIN ${table[1]} b on a.${table[2]} = b.${table[3]}  `
-        } else {
-            innerJoin = table
-        }
+        sql += await innerJoinFN(table)
     } else {
         return false
     }
-    let sql = `SELECT ${displayData} FROM ${innerJoin}`
+
     // 查询条件处理
     if (conditionData) {
-        sql += await conditionName(conditionData)
+        sql += await conditionNameFN(conditionData)
     }
     // 排序字段处理
     if (orderData) {
-        sql += await orderName(orderData)
+        sql += await orderNameFN(orderData)
     }
     // 查询区域处理、分页处理
     if (limitNum) {
@@ -107,7 +104,7 @@ const limitFn = async (str = '0,10') => {
  * @param {*} orderData type of Object | { Sort field :  ASC 正序 DESC 倒序 (默认DESC)} 
  * @returns Filtered SQL statement
  */
-const orderName = (orderData) => {
+const orderNameFN = (orderData) => {
     let keyStr = ''
     Object.keys(orderData).forEach(function (key) {
         keyStr += ` ${key}  ${orderData[key] || 'DESC'} ,`
@@ -123,7 +120,7 @@ const orderName = (orderData) => {
  * @returns Filtered SQL statement
  * 暂时不支持模糊查询具体个数
  */
-const conditionName = (conditionData) => {
+const conditionNameFN = (conditionData) => {
     let keyStr = ''
     let connectionFlag = 'and'
     Object.keys(conditionData).forEach(function (key, index) {
@@ -142,6 +139,26 @@ const conditionName = (conditionData) => {
     });
     keyStr = keyStr.slice(0, keyStr.length - 3)
     return keyStr ? ` WHERE ${keyStr} ` : ''
+}
+
+// 链表查询处理
+const innerJoinFN = (joinData) => {
+    let innerJoin = ''
+
+    if (typeof joinData == 'object') {
+        Object.keys(joinData).forEach((key, index) => {
+            if (index == 0) {
+                innerJoin += key
+            } else {
+                if (joinData[key]) {
+                    innerJoin += ` INNER JOIN ${key}  on ${joinData[key]} `
+                }
+            }
+        })
+    } else {
+        innerJoin = `${table}`
+    }
+    return innerJoin
 }
 
 module.exports = {
