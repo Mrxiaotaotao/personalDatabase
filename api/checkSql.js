@@ -144,7 +144,6 @@ const conditionNameFN = (conditionData) => {
 // 链表查询处理
 const innerJoinFN = (joinData) => {
     let innerJoin = ''
-
     if (typeof joinData == 'object') {
         Object.keys(joinData).forEach((key, index) => {
             if (index == 0) {
@@ -156,7 +155,7 @@ const innerJoinFN = (joinData) => {
             }
         })
     } else {
-        innerJoin = `${table}`
+        innerJoin = `${joinData}`
     }
     return innerJoin
 }

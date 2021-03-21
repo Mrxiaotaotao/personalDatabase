@@ -1,4 +1,6 @@
 const { SucessModel, ErrorModel } = require('../model/index.js')
+const { PsqlModifyAsingle } = require('../api/sqlPublic');
+const SqlTableUserInfo = 'userInfo';
 
 /**
  * 此文件夹为封装层 
@@ -33,9 +35,9 @@ const requiredItem = (ctx, data) => {
 }
 
 // 用户统计处理
-const userNum = (ctx, data) => {
+const extractUserNum = (upData, id) => {
     try {
-
+        PsqlModifyAsingle(SqlTableUserInfo, { ...upData }, { userId: id })
     } catch (error) {
 
     }
@@ -51,6 +53,7 @@ const ruleID = (ctx, data) => {
     return `${timeLs}${mathLs}`
 }
 
+// 日期处理
 const ruleTime = (value, fmt = 'yyyy-MM-dd HH:mm:ss') => {
 
     var d = value ? new Date(value) : new Date()
@@ -83,9 +86,17 @@ const ruleTime = (value, fmt = 'yyyy-MM-dd HH:mm:ss') => {
 
 }
 
+// 用户id提取
+const extractUserId = (ctx) => {
+    return ctx.util.token.ID
+}
+
+// 
+
 module.exports = {
     requiredItem,
-    userNum,
+    extractUserNum,
     ruleID,
-    ruleTime
+    ruleTime,
+    extractUserId
 }
