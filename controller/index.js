@@ -20,6 +20,11 @@ const requiredItem = (ctx, data) => {
             throw Error()
         }
 
+        if (typeof data != 'object') {
+            ctxBody = '类型错误'
+            throw Error()
+        }
+
         Object.keys(data).forEach(item => {
             if (!body[item]) {
                 flag = false

@@ -11,6 +11,7 @@ const {
     related_QueryClass,
     related_upClass,
     related_addClass,
+    related_delClass,
     related_comment,
     related_addComment,
     related_upComment,
@@ -61,6 +62,11 @@ router.post('/upClass', async (ctx) => {
 // 添加分类
 router.post('/addClass', async (ctx) => {
     await related_addClass(ctx)
+})
+
+// 删除分类
+router.post('/delClass', async (ctx) => {
+    await related_delClass(ctx)
 })
 
 // 评论查询
