@@ -6,7 +6,8 @@ const SqlTableAttentionTable = 'attentionTable',
     SqlTableUsers = 'users',
     SqlTableFavoritesTable = 'favoritesTable',
     SqlTableClassificationTable = 'classificationTable',
-    SqlTableCommentTable = 'commentTable';
+    SqlTableCommentTable = 'commentTable',
+    SqlTableBlogTable = 'blogTable';
 /**
  * 
  * 关注 粉丝 统计 分组等
@@ -75,7 +76,6 @@ const related_queryFanstA = async (ctx) => {
         if (requiredItem(ctx, { type })) {
             let tableData = {
                 [SqlTableAttentionTable]: '',
-                [SqlTableUserInfo]: ''
             }, queryData = {}
 
             if (type == 'fans') {
@@ -271,6 +271,19 @@ const related_comment = async (ctx) => {
             // 我的文章评论
             // 待我审核的评论
             // 我发表的评论
+            if (type == '0') {
+
+            } else if (type == '1') {
+
+            } else if (type == '2') {
+                let tableData = { [SqlTableCommentTable]: "" }
+                tableData[SqlTableBlogTable] = `${SqlTableCommentTable}.blogId = ${SqlTableBlogTable}.id`
+                tableData[SqlTableUsers] = `${SqlTableBlogTable}.userId = ${SqlTableUsers}.id`
+                let data = await PsqlQuery(tableData, { commentUserId: extractUserId(ctx) }, false, false, { time: "", commentContent: '', title: '', nickname: '', userName: '' })
+                ctx.body = new SucessModel(data)
+            } else {
+                ctx.body = new SucessModel('类型错误')
+            }
         } else {
             // 博客评论查询
             if (requiredItem(ctx, { blogId })) {
@@ -293,11 +306,10 @@ const related_addComment = async (ctx) => {
                 id: ruleID(),
                 blogId,
                 commentUserId: extractUserId(ctx),
-                content,
+                commentContent: content,
                 time: ruleTime()
             }
             if (pId) addData.parentsId = pId
-
             let data = await PsqlAdd(SqlTableCommentTable, addData)
             if (data.protocol41) {
                 ctx.body = new SucessModel('评论成功')
@@ -316,8 +328,8 @@ const related_upComment = async (ctx) => {
     try {
         let { id, content } = ctx.request.body
         if (requiredItem(ctx, { id, content })) {
-            console.log((SqlTableCommentTable, { content }, { id, commentUserId: extractUserId() }));
-            let data = await PsqlModifyAsingle(SqlTableCommentTable, { content }, { id, commentUserId: extractUserId() })
+            let data = await PsqlModifyAsingle(SqlTableCommentTable, { commentContent: content }, { id, commentUserId: extractUserId(ctx) })
+            console.log(data, '[[]]===');
             if (data.protocol41) {
                 ctx.body = new SucessModel('修改评论成功')
             } else {
@@ -345,11 +357,6 @@ const related_delComment = async (ctx) => {
         ctx.body = new ErrorModel(error, '接口异常')
     }
 }
-
-
-
-
-
 
 module.exports = {
     related_query,

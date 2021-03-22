@@ -93,7 +93,8 @@ const ruleTime = (value, fmt = 'yyyy-MM-dd HH:mm:ss') => {
 
 // 用户id提取
 const extractUserId = (ctx) => {
-    return ctx.util.token.ID
+    if (ctx) return ctx.util.token.ID
+    else ''
 }
 
 // 
