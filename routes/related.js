@@ -85,9 +85,8 @@ router.post('/upComment', async (ctx) => {
 })
 
 // 删除评论
-router.post('/delCommen', async (ctx) => {
+router.post('/delComment', async (ctx) => {
     await related_delComment(ctx)
 })
-
 
 module.exports = router

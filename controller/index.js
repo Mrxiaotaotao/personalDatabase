@@ -61,8 +61,8 @@ const ruleID = (ctx, data) => {
 // 日期处理
 const ruleTime = (value, fmt = 'yyyy-MM-dd HH:mm:ss') => {
 
-    var d = value ? new Date(value) : new Date()
-    var o = {
+    let d = value ? new Date(value) : new Date()
+    let o = {
         'M+': d.getMonth() + 1, // 月份
         'd+': d.getDate(), // 日
         'H+': d.getHours(), // 小时
@@ -77,7 +77,7 @@ const ruleTime = (value, fmt = 'yyyy-MM-dd HH:mm:ss') => {
             (d.getFullYear() + '').substr(4 - RegExp.$1.length)
         )
     }
-    for (var k in o) {
+    for (let k in o) {
         if (new RegExp('(' + k + ')').test(fmt)) {
             fmt = fmt.replace(
                 RegExp.$1,

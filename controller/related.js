@@ -1,11 +1,12 @@
-const { requiredItem, extractUserId, extractUserNum, ruleID } = require('./index')
+const { requiredItem, extractUserId, extractUserNum, ruleID, ruleTime } = require('./index')
 const { SucessModel, ErrorModel } = require('../model/index.js')
 const { PsqlAdd, PsqlDelSingle, PsqlQuery, PsqlModifyAsingle } = require('../api/sqlPublic');
 const SqlTableAttentionTable = 'attentionTable',
     SqlTableUserInfo = 'userInfo',
     SqlTableUsers = 'users',
     SqlTableFavoritesTable = 'favoritesTable',
-    SqlTableClassificationTable = 'classificationTable';
+    SqlTableClassificationTable = 'classificationTable',
+    SqlTableCommentTable = 'commentTable';
 /**
  * 
  * 关注 粉丝 统计 分组等
@@ -264,6 +265,19 @@ const related_delClass = async (ctx) => {
 // 评论查询
 const related_comment = async (ctx) => {
     try {
+        // userId blogId
+        let { type, blogId } = ctx.request.body
+        if (type) {
+            // 我的文章评论
+            // 待我审核的评论
+            // 我发表的评论
+        } else {
+            // 博客评论查询
+            if (requiredItem(ctx, { blogId })) {
+                let data = await PsqlQuery(SqlTableCommentTable, { blogId })
+                ctx.body = new SucessModel(data)
+            }
+        }
 
     } catch (error) {
         ctx.body = new ErrorModel(error, '接口异常')
@@ -273,6 +287,24 @@ const related_comment = async (ctx) => {
 // 添加评论
 const related_addComment = async (ctx) => {
     try {
+        let { blogId, pId, content } = ctx.request.body
+        if (requiredItem(ctx, { blogId, content })) {
+            let addData = {
+                id: ruleID(),
+                blogId,
+                commentUserId: extractUserId(ctx),
+                content,
+                time: ruleTime()
+            }
+            if (pId) addData.parentsId = pId
+
+            let data = await PsqlAdd(SqlTableCommentTable, addData)
+            if (data.protocol41) {
+                ctx.body = new SucessModel('评论成功')
+            } else {
+                ctx.body = new ErrorModel(data, '评论失败，请稍后再试')
+            }
+        }
 
     } catch (error) {
         ctx.body = new ErrorModel(error, '接口异常')
@@ -282,7 +314,16 @@ const related_addComment = async (ctx) => {
 // 修改评论
 const related_upComment = async (ctx) => {
     try {
-
+        let { id, content } = ctx.request.body
+        if (requiredItem(ctx, { id, content })) {
+            console.log((SqlTableCommentTable, { content }, { id, commentUserId: extractUserId() }));
+            let data = await PsqlModifyAsingle(SqlTableCommentTable, { content }, { id, commentUserId: extractUserId() })
+            if (data.protocol41) {
+                ctx.body = new SucessModel('修改评论成功')
+            } else {
+                ctx.body = new ErrorModel(data, '修改评论失败，请稍后再试')
+            }
+        }
     } catch (error) {
         ctx.body = new ErrorModel(error, '接口异常')
     }
@@ -291,7 +332,15 @@ const related_upComment = async (ctx) => {
 // 删除评论
 const related_delComment = async (ctx) => {
     try {
-
+        let { id } = ctx.request.body
+        if (requiredItem(ctx, { id })) {
+            let data = await PsqlDelSingle(SqlTableCommentTable, { id })
+            if (data.protocol41) {
+                ctx.body = new SucessModel('删除评论成功')
+            } else {
+                ctx.body = new ErrorModel(data, '删除评论失败，请稍后再试')
+            }
+        }
     } catch (error) {
         ctx.body = new ErrorModel(error, '接口异常')
     }
