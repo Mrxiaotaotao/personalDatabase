@@ -25,7 +25,8 @@
     "koa-views": "^6.2.0",
     "log4js": "^6.3.0",
     "mysql": "^2.18.1",
-    "pug": "^2.0.3"
+    "pug": "^2.0.3",
+    "ws": "^7.4.4"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"

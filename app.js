@@ -6,6 +6,7 @@ const onerror = require('koa-onerror')
 const logger = require('koa-logger')
 const jwt = require('koa-jwt');
 const jsonWebToken = require('jsonwebtoken')
+const { websocket } = require('./utils/websocket')
 // const logsUtil = require('./utils/logs.js'); // 日志文件输出
 // 中间件引用
 const { mysqlMiddleWare } = require('./applaymiddleware/mysqlMiddleWare')
@@ -14,6 +15,9 @@ const { loggerMiddleWare } = require('./applaymiddleware/loggerMiddleWare')
 const registerRouter = require('./routes')
 // body
 const koaBody = require('koa-body');
+
+// websocket 不同端口方式
+websocket(app)
 
 // error handler
 onerror(app)
@@ -64,7 +68,7 @@ app.use(views(__dirname + '/views', {
 }))
 
 //不要jwt权限验证的接口
-const unlessPath = ['/users/login', '/users/register']
+const unlessPath = ['/users/login', '/users/register', '/json']
 // jwt验证处理方法
 app.use(async (ctx, next) => {
   if (unlessPath.indexOf(ctx.url) !== -1) {
@@ -131,7 +135,8 @@ app.use(async (ctx, next) => {
 //不要jwt权限验证的接口
 const whiteList = [
   /^\/users\/login/,
-  /^\/users\/register/
+  /^\/users\/register/,
+  /^\/json/
 ]
 // 权限验证
 app.use(jwt({ secret: 'my_token' }).unless({ path: whiteList }));
