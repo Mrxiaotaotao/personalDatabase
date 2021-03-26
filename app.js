@@ -6,12 +6,13 @@ const onerror = require('koa-onerror')
 const logger = require('koa-logger')
 const jwt = require('koa-jwt');
 const jsonWebToken = require('jsonwebtoken')
+const webToken = require('./utils/jsonWebToken')
 const { websocket } = require('./utils/websocket')
 // const logsUtil = require('./utils/logs.js'); // 日志文件输出
 // 中间件引用
 const { mysqlMiddleWare } = require('./applaymiddleware/mysqlMiddleWare')
 const { loggerMiddleWare } = require('./applaymiddleware/loggerMiddleWare')
-// routers
+// routers all
 const registerRouter = require('./routes')
 // body
 const koaBody = require('koa-body');
@@ -67,8 +68,14 @@ app.use(views(__dirname + '/views', {
   extension: 'pug'
 }))
 
-//不要jwt权限验证的接口
+// 不要jwt权限验证的接口 白名单
 const unlessPath = ['/users/login', '/users/register', '/json']
+const whiteList = [
+  /^\/users\/login/,
+  /^\/users\/register/,
+  /^\/json/
+]
+
 // jwt验证处理方法
 app.use(async (ctx, next) => {
   if (unlessPath.indexOf(ctx.url) !== -1) {
@@ -84,37 +91,7 @@ app.use(async (ctx, next) => {
         }
       })
       // jwt校验及解密处理
-      let payload = jsonWebToken.verify(token || '', 'my_token', (err, decoded) => {
-        if (err) {
-          if (err.name == 'TokenExpiredError') {//token过期
-            let str = {
-              code: 32,
-              iat: 1,
-              exp: 0,
-              msg: 'token过期'
-            }
-            return str;
-          } else if (err.name == 'JsonWebTokenError') {//无效的token
-            let str = {
-              code: 30,
-              iat: 1,
-              exp: 0,
-              msg: '无效的token'
-            }
-            return str;
-          } else {
-            let str = {
-              code: 31,
-              iat: 1,
-              exp: 0,
-              msg: 'token校验失败'
-            }
-            return str
-          }
-        } else {
-          return decoded;
-        }
-      })
+      let payload = webToken(token)
       ctx.request.header = { 'authorization': "Bearer " + (token || '') }
       //开始时间小于结束时间，代表token还有效
       if (payload.iat < payload.exp) {
@@ -123,21 +100,13 @@ app.use(async (ctx, next) => {
       } else {
         ctx.body = payload
       }
-
     } else {
       // 无jwt或恶意清空cookie
       ctx.body = { code: -4, msg: "无jwt或恶意清空cookie" }
     }
-
   }
 })
 
-//不要jwt权限验证的接口
-const whiteList = [
-  /^\/users\/login/,
-  /^\/users\/register/,
-  /^\/json/
-]
 // 权限验证
 app.use(jwt({ secret: 'my_token' }).unless({ path: whiteList }));
 
@@ -157,7 +126,6 @@ app.use(async (ctx, next) => {
       }
     }
   }).catch((err) => {
-    // console.log(err.status, '测试');
     // 错误状态处理
     if (err.status === 401) {
       ctx.status = 401;
