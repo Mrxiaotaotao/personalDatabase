@@ -10,7 +10,7 @@ const SqlTableUserInfo = 'userInfo';
 
 /**
  *  必填项校验
- * @param {*} ctx 上下文字段
+ * @param {*} ctx 必传 上下文字段
  * @param {*} data 类型 Object { 验证的字段名 : 要提示的备注 } 验证字段及提示备注 没有提示备注及为【xxx字段为必传项】
  */
 const requiredItem = (ctx, data) => {

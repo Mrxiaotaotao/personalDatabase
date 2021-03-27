@@ -19,7 +19,6 @@ const PsqlAdd = async (table, data) => {
     if (data) {
         let keys = '', values = ''
         Object.keys(data).forEach(function (key) {
-            // console.log(key, data[key]);
             keys += key + ','
             values += `"${data[key]}",`
         });
