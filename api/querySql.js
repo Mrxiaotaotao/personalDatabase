@@ -10,7 +10,7 @@ const MySql = require('./mysql')
 
 /**
  * 全量查询
- * @param {*} table  表名 xxx
+ * @param {*} table  表名 xxx 单表查询为String | 多表查询为Object 碰到表名字段重复的情况请用 as 别名处理
  * @param {*} conditionData 条件 {id:"xx"} | 区间段查询  例 SqlBetween = ['筛选字段名', 开始, 结束] | 第一个字段为 SqlOR 表示此查询为 包含的关系(或) or 关联 | 默认为 end 并且关系
  * @param {*} orderData 筛选排序  { Sort field :  ASC 正序 DESC 倒序 (默认DESC)}  | 模糊查询字段 SqlLike = [模糊查询字段名, 字段值]
  * @param {*} limitNum 范围查询 '0,1'
@@ -22,7 +22,11 @@ const PsqlQuery = async (table, conditionData = false, orderData = false, limitN
     if (displayData != '*' && displayData != '') {
         let keyStr = ''
         Object.keys(displayData).forEach(function (key) {
-            keyStr += ` ${key} ,`
+            if (displayData[key]) {
+                keyStr += ` ${displayData[key]} ,`
+            } else {
+                keyStr += ` ${key} ,`
+            }
         });
         keyStr = keyStr.slice(0, keyStr.length - 1)
         displayData = keyStr

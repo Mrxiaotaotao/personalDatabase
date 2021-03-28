@@ -15,8 +15,7 @@ const blog_query = async (ctx) => {
     // 最新文章 时间（进一个月，近三个月，近半年，进行一年，最后发布的一篇） 时间处理  3
     // 个人热门文章 查看个数 5 
 
-    // queryType time 最近文章
-    // queryType popular 个人热门文章
+    // queryType time 最近文章 popular 个人热门文章  system 管理员查询 ''/不传 为全量 加上其他条件查询
     try {
         let { queryType, userId } = ctx.request.body
         if (queryType == 'time') {
@@ -78,7 +77,6 @@ const blog_query = async (ctx) => {
             ctx.body = new SucessModel(data)
 
         }
-
     } catch (error) {
         ctx.body = new ErrorModel(error, '接口异常')
     }

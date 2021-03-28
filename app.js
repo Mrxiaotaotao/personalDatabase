@@ -92,7 +92,8 @@ app.use(async (ctx, next) => {
       })
       // jwt校验及解密处理
       let payload = webToken(token)
-      ctx.request.header = { 'authorization': "Bearer " + (token || '') }
+      ctx.request.header['authorization'] = "Bearer " + (token || '')
+      // ctx.request.header = { 'authorization': "Bearer " + (token || '') }
       //开始时间小于结束时间，代表token还有效
       if (payload.iat < payload.exp) {
         ctx.util.token = payload

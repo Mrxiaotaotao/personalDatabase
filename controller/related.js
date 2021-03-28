@@ -264,18 +264,23 @@ const related_delClass = async (ctx) => {
 
 // 评论查询
 const related_comment = async (ctx) => {
+    console.log(ctx.request.header, 'ctx.request.header.host');
     try {
         // userId blogId
         let { type, blogId } = ctx.request.body
         if (type) {
-            // 我的文章评论
-            // 待我审核的评论
-            // 我发表的评论
+            // 后期合并一下处理
             if (type == '0') {
-
+                // 我的文章评论
+                let tableData = { [SqlTableCommentTable]: "" }
+                tableData[SqlTableBlogTable] = `${SqlTableCommentTable}.blogId = ${SqlTableBlogTable}.id`
+                tableData[SqlTableUsers] = `${SqlTableBlogTable}.userId = ${SqlTableUsers}.id`
+                let data = await PsqlQuery(tableData, { blogUserId: extractUserId(ctx) }, false, false, { time: "", commentContent: '', title: '', nickname: '', userName: '' })
+                ctx.body = new SucessModel(data)
             } else if (type == '1') {
-
+                // 待我审核的评论
             } else if (type == '2') {
+                // 我发表的评论
                 let tableData = { [SqlTableCommentTable]: "" }
                 tableData[SqlTableBlogTable] = `${SqlTableCommentTable}.blogId = ${SqlTableBlogTable}.id`
                 tableData[SqlTableUsers] = `${SqlTableBlogTable}.userId = ${SqlTableUsers}.id`
@@ -287,13 +292,54 @@ const related_comment = async (ctx) => {
         } else {
             // 博客评论查询
             if (requiredItem(ctx, { blogId })) {
-                let data = await PsqlQuery(SqlTableCommentTable, { blogId })
-                ctx.body = new SucessModel(data)
+                let tableData = { [SqlTableCommentTable]: "" }
+                tableData[SqlTableUserInfo] = `${SqlTableCommentTable}.commentUserId = ${SqlTableUserInfo}.userId`
+                tableData[SqlTableUsers] = `${SqlTableCommentTable}.commentUserId = ${SqlTableUsers}.id`
+                let data = await PsqlQuery(tableData, { blogId }, false, false, {
+                    id: `${SqlTableCommentTable}.id`,
+                    parentsId: `${SqlTableCommentTable}.parentsId`,
+                    nickname: '',
+                    userName: '',
+                    actualName: '',
+                    userImg: '',
+                    commentContent: `${SqlTableCommentTable}.commentContent`,
+                    time: `${SqlTableCommentTable}.time`,
+                })
+                ctx.body = new SucessModel(await structureData(data))
             }
         }
 
     } catch (error) {
         ctx.body = new ErrorModel(error, '接口异常')
+    }
+}
+
+// 处理评论树结构 
+const structureData = async (list, data) => {
+    let tableList = []
+    if (data) {
+        // 对于子级进行数据处理
+        let newList = []
+        list.forEach(async item => {
+            if (data.id == item.parentsId) {
+                newList.push({
+                    ...item,
+                    childrenList: await structureData(list, item)
+                })
+            }
+        })
+        return newList
+    } else {
+        // 对第一级数据处理
+        list.forEach(async item => {
+            if (item.parentsId == null) {
+                tableList.push({
+                    ...item,
+                    childrenList: await structureData(list, item)
+                })
+            }
+        });
+        return tableList
     }
 }
 
