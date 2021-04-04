@@ -8,6 +8,7 @@ const jwt = require('koa-jwt');
 const jsonWebToken = require('jsonwebtoken')
 const webToken = require('./utils/jsonWebToken')
 const { websocket } = require('./utils/websocket')
+const { users_logout } = require('./controller/users')
 // const logsUtil = require('./utils/logs.js'); // 日志文件输出
 // 中间件引用
 const { mysqlMiddleWare } = require('./applaymiddleware/mysqlMiddleWare')
@@ -82,7 +83,7 @@ app.use(async (ctx, next) => {
     await next()
   } else {
     if (ctx.header.cookie) {
-      let list = ctx.header.cookie.split(';')
+      let list = ctx.header.cookie.split('; ')
       let token = ''
       list.forEach(item => {
         let cookieKey = item.split('=')
@@ -90,6 +91,7 @@ app.use(async (ctx, next) => {
           token = cookieKey[1]
         }
       })
+      console.log(list, '0-----', ctx.header.cookie);
       // jwt校验及解密处理
       let payload = webToken(token)
       ctx.request.header['authorization'] = "Bearer " + (token || '')
@@ -99,6 +101,7 @@ app.use(async (ctx, next) => {
         ctx.util.token = payload
         await next();
       } else {
+        await users_logout(ctx)
         ctx.body = payload
       }
     } else {

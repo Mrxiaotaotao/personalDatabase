@@ -62,9 +62,10 @@ const users_logout = (ctx) => {
 const users_register = async (ctx) => {
     try {
         const { administrators, username, password, repassword, nickname } = ctx.request.body;
+        let requiredFlag = true
         // 生成id
         const userId = new Date().getTime().toFixed(0)
-
+        console.log(administrators, '可是');
         if (administrators) {
             // 管理员
             const { gender, info, email, phone } = ctx.request.body;
@@ -100,6 +101,8 @@ const users_register = async (ctx) => {
                 if (!data.protocol41) {
                     return ctx.body = data
                 }
+            } else {
+                requiredFlag = false
             }
         } else {
             // 用户
@@ -123,10 +126,14 @@ const users_register = async (ctx) => {
                 } else {
                     users_userInfo(ctx, userId)
                 }
+            } else {
+                requiredFlag = false
             }
         }
+        if (requiredFlag) {
+            ctx.body = new SucessModel('注册成功！')
 
-        ctx.body = new SucessModel('注册成功！')
+        }
     } catch (error) {
         ctx.body = new ErrorModel(error, '接口异常')
     }
