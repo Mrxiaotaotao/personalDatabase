@@ -22,6 +22,7 @@ const home_query = async (ctx) => {
                 }
             }
             list[i].childList = childList
+            list[i].disable = list[i].disable == 0
         }
         ctx.body = new SucessModel(list)
     } catch (error) {
