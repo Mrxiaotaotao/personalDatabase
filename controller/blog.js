@@ -1,6 +1,6 @@
 const { requiredItem, ruleID, ruleTime } = require('./index')
 const { SucessModel, ErrorModel } = require('../model/index.js')
-const { PsqlQuery, PsqlModifyAsingle, PsqlAdd } = require('../api/sqlPublic')
+const { PsqlQuery, PsqlModifyAsingle, PsqlAdd, PsqlQueryTotal } = require('../api/sqlPublic')
 const SqlTableBlogTable = 'blogTable'
 
 // 查询全量博客列表数据 查询条件处理
@@ -48,15 +48,17 @@ const blog_query = async (ctx) => {
 
         } else if (queryType == 'system') {
             // 管理员查询
-            let { sortType = "firstDate" } = ctx.request.body
+            let { sortType = "firstDate", page = 1, pageSize = 10 } = ctx.request.body
             // 根据什么条件进行查询
             let sortData = {}
             sortData[sortType] = "DESC"
-            let data = await PsqlQuery(SqlTableBlogTable, false, sortData, false)
+            let data = await PsqlQuery(SqlTableBlogTable, false, sortData, `${page},${pageSize}`)
+            let [total] = await PsqlQueryTotal(SqlTableBlogTable)
+            console.log(total, '测试');
             if (data.code) {
                 return ctx.body = data
             }
-            ctx.body = new SucessModel(data)
+            ctx.body = new SucessModel({ ...total, page, pageSize, data })
         } else {
             // 个人博客内容查询
             // 分页 时间段 排序类型 seeNum/firstDate

@@ -91,7 +91,6 @@ app.use(async (ctx, next) => {
           token = cookieKey[1]
         }
       })
-      console.log(list, '0-----', ctx.header.cookie);
       // jwt校验及解密处理
       let payload = webToken(token)
       ctx.request.header['authorization'] = "Bearer " + (token || '')

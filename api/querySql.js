@@ -56,6 +56,17 @@ const PsqlQuery = async (table, conditionData = false, orderData = false, limitN
     return await MySql(sql)
 }
 
+const PsqlQueryTotal = async (table, conditionData = false) => {
+
+    // SELECT COUNT(*) as total FROM blogTable  WHERE userId = '1111';
+    let sql = `SELECT COUNT(*) as total FROM ${table} `
+    // 查询条件处理
+    if (conditionData) {
+        sql += await conditionNameFN(conditionData)
+    }
+    return await MySql(sql)
+}
+
 /**
  * 查询单表多条件
  * @param {*} table  Table Name
@@ -94,7 +105,6 @@ const orderSqlName = (sql, orderKey, orderValue = 'ASC') => {
  * @param {*} str  Offset | Start with a question | Types of String | x,x
  * @returns 
  */
-
 const limitFn = async (str = '0,10') => {
     let strL = str.split(',')
     let startNum = Number(strL[0])
@@ -166,5 +176,6 @@ const innerJoinFN = (joinData) => {
 
 module.exports = {
     PsqlListMultiple,
-    PsqlQuery
+    PsqlQuery,
+    PsqlQueryTotal
 }
