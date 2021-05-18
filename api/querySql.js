@@ -59,7 +59,14 @@ const PsqlQuery = async (table, conditionData = false, orderData = false, limitN
 const PsqlQueryTotal = async (table, conditionData = false) => {
 
     // SELECT COUNT(*) as total FROM blogTable  WHERE userId = '1111';
-    let sql = `SELECT COUNT(*) as total FROM ${table} `
+    let sql = `SELECT COUNT(*) as total FROM `
+
+    // 链表查询处理 
+    if (table) {
+        sql += await innerJoinFN(table)
+    } else {
+        return false
+    }
     // 查询条件处理
     if (conditionData) {
         sql += await conditionNameFN(conditionData)

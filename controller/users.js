@@ -31,6 +31,18 @@ const users_login = async (ctx) => {
             if (res) {
                 const { userName, userId, nickname, gender, premission, id } = res
                 let expiresIn = premission == 0 ? (24 * 7) + 'h' : '6h'
+
+                if (body.systemFlag) {
+                    if (premission != 1 && premission != 2) {
+                        ctx.body = new ErrorModel('您当前登陆状态错误！')
+                        return
+                    }
+                } else {
+                    if (premission != 0) {
+                        ctx.body = new ErrorModel('您当前登陆状态错误！')
+                        return
+                    }
+                }
                 console.log('过期时长 --- ', expiresIn);
                 const jwt = jsonWebToken.sign({ password, userId, ID: id }, 'my_token', { expiresIn })
                 ctx.cookies.set('Authorization', jwt)
@@ -43,7 +55,7 @@ const users_login = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -54,7 +66,7 @@ const users_logout = (ctx) => {
         ctx.cookies.set('Premission', '', { signed: false, maxAge: 0 })
         ctx.body = new SucessModel('成功退出')
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -107,8 +119,10 @@ const users_register = async (ctx) => {
         } else {
             // 用户
             const { username } = ctx.request.body;
+            console.log(username, '111', requiredItem(ctx, { username, password, nickname, repassword }));
             if (requiredItem(ctx, { username, password, nickname, repassword })) {
                 let checkName = await users_register_check(username, password, repassword, nickname)
+                console.log(checkName, '测试222');
                 if (checkName) {
                     return ctx.body = new ErrorModel(checkName)
                 }
@@ -121,6 +135,7 @@ const users_register = async (ctx) => {
                     nickname
                 }
                 const data = await PsqlAdd(SqlTableUser, tableValueData)
+                console.log(data, '9999');
                 if (!data.protocol41) {
                     return ctx.body = data
                 } else {
@@ -135,7 +150,7 @@ const users_register = async (ctx) => {
 
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -180,7 +195,7 @@ const users_changePassword = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -198,7 +213,7 @@ const users_upDateRegister = async (ctx) => {
         // ctx.body = new SucessModel('修改成功！')
 
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -241,7 +256,7 @@ const users_userInfo = async (ctx, deflag = false) => {
         }
         return ctx.body = new SucessModel('个人数据修改成功')
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -253,6 +268,7 @@ const users_register_check = async (username, password, repassword, nickname) =>
 
     //用户名是否注册过
     const [user] = await PsqlQuery(SqlTableUser, { 'userId': username });
+    console.log(user, '99999');
     if (user) {
         return '该用户名或账号已注册！'
     }

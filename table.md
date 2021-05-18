@@ -57,6 +57,17 @@ create table homeList (
         ...
         用户昵称
         用户ID
+create table users (
+	id INT not NULL comment '用户ID',
+	userId Char(24) comment '账号或用户名',
+	userPassWord Char(24) comment '用户密码',
+	nickname Char(24) comment '昵称',
+	premission int not null default 0 comment '权限等级',
+	email Char(24) comment '邮箱',
+	phone Char(24) comment '电话',
+	gender int not null default 0 comment '性别 0 未知 1 男 2女',
+	info Char(24) comment '简介'
+)
     userInfo
         字段名
         userId 用户id 子id

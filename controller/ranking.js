@@ -16,7 +16,7 @@ const ranking_query = async (ctx) => {
         let data = await PsqlQuery(SqlTableBlogTable, queryData, { seeNum: "" }, `${page},${pageSize}`)
         ctx.body = new SucessModel(data)
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -26,7 +26,7 @@ const ranking_navQuery = async (ctx) => {
         let data = await PsqlQuery(SqlTableNavTable, { navType: '2', navFlag: '1' }, { sorts: 'ASC' })
         ctx.body = new SucessModel(data)
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -76,7 +76,7 @@ const ranking_addNav = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -115,7 +115,7 @@ const ranking_upNav = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 

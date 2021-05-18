@@ -63,7 +63,7 @@ const attentionFN = async (ctx, type) => {
         }
 
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -97,7 +97,7 @@ const related_queryFanstA = async (ctx) => {
         }
 
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -123,7 +123,7 @@ const related_favorites = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -150,7 +150,7 @@ const related_unfavorites = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -165,7 +165,7 @@ const related_QueryClass = async (ctx) => {
         }
         ctx.body = new SucessModel(data)
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 // 修改分类 介绍
@@ -196,7 +196,7 @@ const related_upClass = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -231,7 +231,7 @@ const related_addClass = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -258,7 +258,7 @@ const related_delClass = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -310,7 +310,7 @@ const related_comment = async (ctx) => {
         }
 
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -365,7 +365,7 @@ const related_addComment = async (ctx) => {
         }
 
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -383,7 +383,7 @@ const related_upComment = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -400,7 +400,7 @@ const related_delComment = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 

@@ -26,7 +26,7 @@ const home_query = async (ctx) => {
         }
         ctx.body = new SucessModel(list)
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -39,7 +39,7 @@ const home_navQuery = async (ctx) => {
         }
         ctx.body = new SucessModel(data)
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 
 }
@@ -63,7 +63,7 @@ const home_navHome = async (ctx) => {
         }
         ctx.body = new SucessModel(obj)
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -117,7 +117,7 @@ const home_addItem = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -208,7 +208,7 @@ const home_upItem = async (ctx) => {
 
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -231,7 +231,7 @@ const home_upNavList = async (ctx) => {
         }
 
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 

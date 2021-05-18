@@ -24,7 +24,7 @@ class SucessModel extends Model {
 
 class ErrorModel extends Model {
     constructor(data, msg) {
-        super(data, msg);
+        super(data, msg = '接口异常');
         this.code = -1
     }
 }

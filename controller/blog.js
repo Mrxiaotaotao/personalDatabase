@@ -1,7 +1,8 @@
 const { requiredItem, ruleID, ruleTime } = require('./index')
 const { SucessModel, ErrorModel } = require('../model/index.js')
 const { PsqlQuery, PsqlModifyAsingle, PsqlAdd, PsqlQueryTotal } = require('../api/sqlPublic')
-const SqlTableBlogTable = 'blogTable'
+const SqlTableBlogTable = 'blogTable', SqlTableUser = 'users', SqlTableUserInfo = 'userInfo'
+
 
 // 查询全量博客列表数据 查询条件处理
 const blog_query = async (ctx) => {
@@ -52,9 +53,20 @@ const blog_query = async (ctx) => {
             // 根据什么条件进行查询
             let sortData = {}
             sortData[sortType] = "DESC"
-            let data = await PsqlQuery(SqlTableBlogTable, false, sortData, `${page},${pageSize}`)
-            let [total] = await PsqlQueryTotal(SqlTableBlogTable)
-            console.log(total, '测试');
+
+            let queryData = {
+                [SqlTableBlogTable]: "",
+                [SqlTableUser]: `${SqlTableBlogTable}.userId = ${SqlTableUser}.id`
+            }
+            let data = await PsqlQuery(queryData, false, sortData, `${page},${pageSize}`, {
+                id: `${SqlTableBlogTable}.id`,
+                nickname: '',
+                firstDate: `${SqlTableBlogTable}.firstDate`,
+                title: '',
+                userId: `${SqlTableBlogTable}.userId`,
+            })
+            let [total] = await PsqlQueryTotal(queryData)
+            // console.log(total, '测试');
             if (data.code) {
                 return ctx.body = data
             }
@@ -80,7 +92,7 @@ const blog_query = async (ctx) => {
 
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -130,7 +142,7 @@ const blog_addBlog = async (ctx) => {
         }
 
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -149,7 +161,7 @@ const blog_upBlog = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
@@ -168,7 +180,7 @@ const blog_seeNum = async (ctx) => {
             }
         }
     } catch (error) {
-        ctx.body = new ErrorModel(error, '接口异常')
+        ctx.body = new ErrorModel(error, '')
     }
 }
 
