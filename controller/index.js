@@ -100,24 +100,24 @@ const extractUserId = (ctx) => {
 }
 
 // 文件上传处理
-const processUploadFile = (ctx, typeName) => {
+// const processUploadFile = (ctx, typeName) => {
 
-    try {
-        const file = ctx?.request?.files?.file || {}; // 获取上传文件
-        if (file.path && uploadsName.indexOf(typeName) !== -1) {
-            const reader = fs.createReadStream(file.path); // 创建可读流
-            const flile_name = Date.now() + "_" + file.name
-            const upStream = fs.createWriteStream(`public/uploads/${typeName}/${flile_name}`); // 创建可写流
-            reader.pipe(upStream); // 可读流通过管道写入可写流
-            console.log(ctx.request.header['x-forwarded-proto'] + '://' + ctx.request.header.host, '文件前缀展示');
-            return `/uploads/${typeName}/${flile_name}`
-        } else {
-            return false
-        }
-    } catch (error) {
-        return false
-    }
-}
+//     try {
+//         const file = ctx?.request?.files?.file || {}; // 获取上传文件
+//         if (file.path && uploadsName.indexOf(typeName) !== -1) {
+//             const reader = fs.createReadStream(file.path); // 创建可读流
+//             const flile_name = Date.now() + "_" + file.name
+//             const upStream = fs.createWriteStream(`public/uploads/${typeName}/${flile_name}`); // 创建可写流
+//             reader.pipe(upStream); // 可读流通过管道写入可写流
+//             console.log(ctx.request.header['x-forwarded-proto'] + '://' + ctx.request.header.host, '文件前缀展示');
+//             return `/uploads/${typeName}/${flile_name}`
+//         } else {
+//             return false
+//         }
+//     } catch (error) {
+//         return false
+//     }
+// }
 
 // 删除文件
 const delFiles = (filesName, typeName) => {
@@ -139,6 +139,6 @@ module.exports = {
     ruleID,
     ruleTime,
     extractUserId,
-    processUploadFile,
+    // processUploadFile,
     delFiles
 }
