@@ -11,7 +11,7 @@
  Target Server Version : 80019
  File Encoding         : 65001
 
- Date: 18/05/2021 14:04:25
+ Date: 04/09/2021 12:52:56
 */
 
 SET NAMES utf8mb4;
@@ -56,7 +56,8 @@ CREATE TABLE `blogTable` (
   `title` varchar(1024) DEFAULT NULL COMMENT '标题',
   `content` text NOT NULL COMMENT '内容 为html 富文本 ',
   `top` int NOT NULL COMMENT '置顶 0 不置顶 1++ 置顶顺序',
-  `integralNum` bigint NOT NULL DEFAULT '0' COMMENT '关注'
+  `integralNum` bigint NOT NULL DEFAULT '0' COMMENT '关注',
+  `visibleMode` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '0' COMMENT '可见方式 0公开 1私密 2粉丝 4vip'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
@@ -165,7 +166,8 @@ CREATE TABLE `homeTable` (
   `title` char(12) DEFAULT NULL,
   `icon` char(54) DEFAULT NULL,
   `type` char(24) DEFAULT NULL,
-  `TypeSize` int DEFAULT NULL
+  `TypeSize` int DEFAULT NULL,
+  `orders` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '55'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------

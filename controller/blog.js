@@ -113,8 +113,8 @@ const timeDate = async (time, type) => {
 // 添加博客数据
 const blog_addBlog = async (ctx) => {
     try {
-        let { userId, blogClass, blogLabel, blogType, title, content } = ctx.request.body
-        if (requiredItem(ctx, { userId, blogClass, blogLabel, blogType, title, content })) {
+        let { userId, blogClass, blogLabel, blogType, visibleMode, title, content } = ctx.request.body
+        if (requiredItem(ctx, { userId, blogClass, blogLabel, blogType, title, content, visibleMode })) {
             // let [titleFlag] = await PsqlQuery(SqlTableBlogTable, { title })
             // if (titleFlag) {
             //     return ctx.body = new ErrorModel('请不要重复添加')
@@ -131,7 +131,8 @@ const blog_addBlog = async (ctx) => {
                 firstDate: date,
                 lastDate: date,
                 top: 0,
-                articleLink: `/${userId}/article/${id}`
+                articleLink: `/${userId}/article/${id}`,
+                visibleMode
             }
             let data = await PsqlAdd(SqlTableBlogTable, addData)
             if (data.protocol41) {
