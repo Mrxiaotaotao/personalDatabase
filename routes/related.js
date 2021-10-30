@@ -15,7 +15,8 @@ const {
     related_comment,
     related_addComment,
     related_upComment,
-    related_delComment
+    related_delComment,
+    related_queryLabel
 
 } = require('../controller/related')
 
@@ -50,7 +51,7 @@ router.post('/unfavorites', async (ctx) => {
 })
 
 // 分类
-router.post('/QueryClass', async (ctx) => {
+router.post('/queryClass', async (ctx) => {
     await related_QueryClass(ctx)
 })
 
@@ -89,4 +90,7 @@ router.post('/delComment', async (ctx) => {
     await related_delComment(ctx)
 })
 
+router.post('/queryLabel', async (ctx) => {
+    await related_queryLabel(ctx)
+})
 module.exports = router

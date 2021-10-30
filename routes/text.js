@@ -15,12 +15,19 @@ router.get('/', async (ctx, next) => {
 // })
 
 const { socketSend } = require("../utils/websocket")
-
+// socketSend('koa2 json')
+// ctx.body = {
+//   title: 'koa2 json'
+// }
 router.get('/json', async (ctx, next) => {
-  socketSend('koa2 json')
-  ctx.body = {
-    title: 'koa2 json'
-  }
+  // console.log(ctx);
+  // console.log(ctx.query); //{a:1,b:2}
+  // console.log(ctx.querystring); // a=1&b=2
+  // console.log(ctx.request.query); //{a:1,b:2}
+  // console.log(ctx.request.querystring); //a=1&b=2
+
+  // console.log(ctx.query);
+  ctx.body = { msg: "测试数据" }
 })
 
 // router.post('/upload', upload.single('file'), async (ctx, next) => {

@@ -96,7 +96,7 @@ const ruleTime = (value, fmt = 'yyyy-MM-dd HH:mm:ss') => {
 // 用户id提取
 const extractUserId = (ctx) => {
     if (ctx) return ctx.util.token.ID
-    else ''
+    else return ''
 }
 
 // 文件上传处理

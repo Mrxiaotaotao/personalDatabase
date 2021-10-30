@@ -7,7 +7,8 @@ const SqlTableAttentionTable = 'attentionTable',
     SqlTableFavoritesTable = 'favoritesTable',
     SqlTableClassificationTable = 'classificationTable',
     SqlTableCommentTable = 'commentTable',
-    SqlTableBlogTable = 'blogTable';
+    SqlTableBlogTable = 'blogTable',
+    SqlTableLabelTable = 'labelTable';
 /**
  * 
  * 关注 粉丝 统计 分组等
@@ -159,7 +160,7 @@ const related_QueryClass = async (ctx) => {
     try {
         let { type } = ctx.request.body, userId = extractUserId(ctx), data = []
         if (type == '1' || type == '0') {
-            data = await PsqlQuery(SqlTableClassificationTable, { userId, del: type })
+            data = await PsqlQuery(SqlTableClassificationTable, { userId, display: type })
         } else {
             return ctx.body = new ErrorModel('type不能为空或值不正确')
         }
@@ -404,6 +405,17 @@ const related_delComment = async (ctx) => {
     }
 }
 
+
+// 查询标签
+const related_queryLabel = async (ctx) => {
+    try {
+        let data = await PsqlQuery(SqlTableLabelTable, { id: extractUserId(ctx) })
+        ctx.body = new SucessModel(data)
+    } catch (error) {
+        ctx.body = new ErrorModel(error, '')
+    }
+}
+
 module.exports = {
     related_query,
     related_attention,
@@ -419,4 +431,5 @@ module.exports = {
     related_addComment,
     related_upComment,
     related_delComment,
+    related_queryLabel
 }
