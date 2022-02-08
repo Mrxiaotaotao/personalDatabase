@@ -19,7 +19,7 @@ const { socketSend } = require("../utils/websocket")
 // ctx.body = {
 //   title: 'koa2 json'
 // }
-router.get('/json', async (ctx, next) => {
+router.post('/json', async (ctx, next) => {
   // console.log(ctx);
   // console.log(ctx.query); //{a:1,b:2}
   // console.log(ctx.querystring); // a=1&b=2
